@@ -5,7 +5,7 @@
 set -e
 
 # Define the dotfiles directory
-DOTFILES_DIR="$HOME/.shell"
+DOTFILES_DIR="$HOME/dev/dotfiler"
 
 # Ensure Homebrew is in PATH
 export PATH="/opt/homebrew/bin:$PATH"
@@ -64,12 +64,19 @@ info "Step 3: Creating symbolic links..."
 # 3. Create symbolic links
 
 # Link .zshrc
-info "Linking $DOTFILES_DIR/zshrc to $HOME/.zshrc"
-ln -sfv "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+info "Linking $DOTFILES_DIR/dotfiles/zshrc to $HOME/.zshrc"
+ln -sfv "$DOTFILES_DIR/dotfiles/zshrc" "$HOME/.zshrc"
+
+# Create ~/.config directory if it doesn't exist
+mkdir -p "$HOME/.config"
+
+# Link ghostty config
+info "Linking $DOTFILES_DIR/dotfiles/ghostty to $HOME/.config/ghostty"
+ln -sfv "$DOTFILES_DIR/dotfiles/ghostty" "$HOME/.config/ghostty"
 
 # Link other dotfiles as needed (example)
-# info "Linking $DOTFILES_DIR/gitconfig to $HOME/.gitconfig"
-# ln -sfv "$DOTFILES_DIR/gitconfig" "$HOME/.gitconfig"
+# info "Linking $DOTFILES_DIR/dotfiles/gitconfig to $HOME/.gitconfig"
+# ln -sfv "$DOTFILES_DIR/dotfiles/gitconfig" "$HOME/.gitconfig"
 
 STEP_END=$(date +%s)
 info "Step 3 complete. Duration: $((STEP_END - STEP_START)) seconds."

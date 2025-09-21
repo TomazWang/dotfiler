@@ -12,7 +12,7 @@ log_shell() {
 # set -e
 
 # Define the dotfiles directory
-DOTFILES_DIR="$HOME/.shell"
+DOTFILES_DIR="$HOME/dev/dotfiler"
 
 # Function to source files if they exist and are readable
 source_if_exists() {
@@ -27,7 +27,7 @@ source_if_exists() {
 }
 
 # Source all .sh files in the specified directories
-for dir in "configs" "functions" "scripts" "utils"; do
+for dir in "shell/configs" "shell/functions" "shell/scripts" "shell/utils"; do
     while IFS= read -r -d '' file; do
         source_if_exists "$file"
     done < <(find "$DOTFILES_DIR/$dir" -name "*.sh" -print0)

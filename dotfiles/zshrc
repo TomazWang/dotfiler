@@ -42,11 +42,11 @@ fi
 log_zshrc "Finished sourcing oh-my-zsh."
 
 # ============ Shell dotfiles =================
-log_zshrc "Sourcing shell dotfiles (apply.sh)..."
-if [ -f "$HOME/.shell/apply.sh" ]; then
-    source $HOME/.shell/apply.sh
+log_zshrc "Sourcing shell dotfiles (load.sh)..."
+if [ -f "$HOME/dev/dotfiler/shell/load.sh" ]; then
+    source $HOME/dev/dotfiler/shell/load.sh
 else
-    echo "Warning: .shell/apply.sh not found"
+    echo "Warning: dotfiler/shell/load.sh not found"
 fi
 log_zshrc "Finished sourcing shell dotfiles."
 

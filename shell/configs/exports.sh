@@ -38,4 +38,4 @@ export EDITOR=$(which vim)
 export SDKMAN_DIR="$HOME/.sdkman"
 
 # Add the bin directory to the PATH
-export PATH="$HOME/.shell/bin:$PATH"
+export PATH="$HOME/dev/dotfiler/bin:$PATH"
