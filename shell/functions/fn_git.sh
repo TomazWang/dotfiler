@@ -1,0 +1,3 @@
+# !/bin/bash
+
+function gitignore() { curl -sLw n https://www.toptal.com/developers/gitignore/api/$@ ;}

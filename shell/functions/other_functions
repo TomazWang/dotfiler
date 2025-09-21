@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# function javis(){
+
+    # if [ $# -eq 0 ]; then
+    #     echo "$(<~/.function_support/javis_help.txt)" 
+    #     return
+    # fi
+
+    # fun_name=""
+
+    # case $1 in 
+    #     vib )
+    #         fun_name="JAVIS_VIB"
+    #         ;;
+    #     wifi_check | check_wifi)
+    #         fun_name="JAVIS_CHECK_WIFI"
+    #         ;;
+    #     wifi )
+    #         fun_name="JAVIS_WIFI"
+    #         ;;
+
+    #     brightness )
+    #         fun_name="JAVIS_BRIGHTNESS"
+    #         ;;
+    #     help )
+    #         echo "$(<~/.function_support/javis_help.txt)" 
+    #         return
+    #         ;;
+    #     * ) 
+    #         echo "'$1' is not a supported javis command." 
+    #         return
+    #         ;;
+    # esac
+    # shift
+    
+
+    # values=""
+
+    # while [ "$1" != "" ]; do
+    #     case $1 in 
+    #         "-h" )
+    #             file_name="~/.function_support/javis_help_$fun_name.txt"
+    #             if [ -f file_name ]; then
+    #                 echo "$(<$file_name)"
+    #             else
+    #                 echo "no help document found. $file_name"
+    #             fi
+    #             return
+    #             ;;
+    #         * )
+    #             if [ "$values" != "" ]; then
+    #                 values="$values^$1"
+    #             else
+    #                 values="$1"
+    #             fi
+    #     esac
+    #     shift
+    # done
+
+    # echo "send a javis function $fun_name with values $values to your phone."
+    # json="{\"value1\":\"$fun_name\",\"value2\":\"$values\"}"
+    # echo $json
+    # curl -X POST -H "Content-Type: application/json" -d "$json" https://maker.ifttt.com/trigger/javis_event/with/key/bTj8X1RCAfA-h-gbbtdQuw
+# }
+
+

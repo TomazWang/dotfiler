@@ -1,0 +1,40 @@
+#!/bin/bash
+
+miniq_raise_error(){
+    local error_message=$*;
+    ehco "$error_message" 1>&2;
+}
+
+miniq_profile(){
+    local profileName="$1";
+    
+    if [[ -z $profileName ]]; then
+        jq .profile < ~/.minikube/config/config.json 
+    else
+        minikube profile "$profileName"
+    fi
+}
+
+
+
+function miniq(){
+    command="$1";
+
+    if [[ -z $command ]]; then
+        raise_error "Expected a command";
+        # display_usage;
+        return;
+    fi
+
+
+    case $command in
+        "profile" )
+            shift;
+            miniq_profile "$@";
+            ;;
+        * )
+            echo "Command $command not supported";
+            # display_usage;
+            ;;
+    esac
+}

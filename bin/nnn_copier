@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# About nnn
+
+## config copy
+export NNN_COPIER="~/.shell/nnn/shell_nnn_copier.sh"
+
+## config cd on quit
+export NNN_TMPFILE="/tmp/nnn"
+n(){
+    nnn "$@"
+
+    if [ -f $NNN_TMPFILE ]; then
+            . $NNN_TMPFILE
+            rm -f $NNN_TMPFILE
+    fi
+}
+echo -n $1 | pbcopy

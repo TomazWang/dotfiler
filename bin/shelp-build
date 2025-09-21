@@ -1,0 +1,403 @@
+#!/bin/bash
+
+# shelp-build - Shell Help System Builder
+# Optimized version with incremental updates and better error handling
+set -euo pipefail
+
+# Configuration
+readonly SHELL_DIR="$HOME/.shell"
+readonly HELP_DIR="$SHELL_DIR/docs"
+readonly INDEX_FILE="$HELP_DIR/index.txt"
+readonly FUNCTIONS_DIR="$SHELL_DIR/functions"
+readonly BIN_DIR="$SHELL_DIR/bin"
+readonly ALIAS_FILE="$SHELL_DIR/configs/alias.sh"
+readonly TIMESTAMP_FILE="$HELP_DIR/.last_build"
+
+# Command line options
+FORCE_REBUILD=false
+QUIET_MODE=false
+
+# Colors for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
+
+log_info() { [[ "$QUIET_MODE" != "true" ]] && echo -e "${BLUE}[INFO]${NC} $*"; }
+log_success() { [[ "$QUIET_MODE" != "true" ]] && echo -e "${GREEN}[SUCCESS]${NC} $*"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+
+# Parse command line arguments
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --clean|--force|-f)
+                FORCE_REBUILD=true
+                shift
+                ;;
+            --quiet|-q)
+                QUIET_MODE=true
+                shift
+                ;;
+            --help|-h)
+                show_usage
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                show_usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# Show usage information
+show_usage() {
+    cat << EOF
+shelp-build - Shell Help System Builder
+
+Usage: shelp-build [options]
+
+Options:
+  -f, --force, --clean    Force full rebuild (ignore timestamps)
+  -q, --quiet            Quiet mode (minimal output)
+  -h, --help             Show this help message
+
+Examples:
+  shelp-build            Incremental update (if needed)
+  shelp-build --clean    Force complete rebuild
+  shelp-build --quiet    Silent rebuild
+EOF
+}
+
+# Check if rebuild is needed based on file timestamps
+needs_rebuild() {
+    # If force rebuild requested
+    [[ "$FORCE_REBUILD" == "true" ]] && return 0
+    
+    # If no previous build or missing index
+    [[ ! -f "$TIMESTAMP_FILE" ]] || [[ ! -f "$INDEX_FILE" ]] && return 0
+    
+    local last_build_time
+    last_build_time=$(cat "$TIMESTAMP_FILE" 2>/dev/null || echo "0")
+    
+    # Check if source files are newer than last build
+    local newer_files
+    newer_files=$(find "$FUNCTIONS_DIR" "$ALIAS_FILE" -newer "$TIMESTAMP_FILE" 2>/dev/null | wc -l | tr -d ' ')
+    
+    [[ "$newer_files" -gt 0 ]] && return 0
+    
+    log_info "Documentation is up-to-date. Use --force to rebuild."
+    return 1
+}
+
+# Initialize help directory structure
+init_help_structure() {
+    log_info "Initializing help directory structure..."
+    mkdir -p "$HELP_DIR"/{aliases,custom,general,git,brew,utils,packages}
+    log_success "Help directory structure initialized"
+}
+
+# Clean existing docs
+clean_docs() {
+    log_info "Cleaning existing documentation..."
+    [[ -d "$HELP_DIR" ]] && rm -rf "$HELP_DIR"
+    log_success "Existing documentation cleaned"
+}
+
+# Extract basic function documentation
+extract_function_docs() {
+    log_info "Extracting function documentation..."
+    local function_count=0
+    
+    for file in "$FUNCTIONS_DIR"/*.sh; do
+        [[ -f "$file" ]] || continue
+        log_info "Processing: $(basename "$file")"
+        
+        while read -r line; do
+            if [[ "$line" =~ ^[[:space:]]*([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]*\(\) ]]; then
+                local func_name="${BASH_REMATCH[1]}"
+                [[ "$func_name" =~ ^(_|compdef|complete) ]] && continue
+                
+                # Create basic help file
+                cat > "$HELP_DIR/custom/${func_name}.txt" << EOF
+FUNCTION: $func_name
+
+DESCRIPTION:
+  Custom shell function
+
+USAGE:
+  $func_name [arguments]
+
+TYPE: Function
+SOURCE: $(basename "$file")
+EOF
+                ((function_count++))
+            fi
+        done < "$file"
+    done
+    
+    log_success "Extracted documentation for $function_count functions"
+}
+
+# Extract brew package documentation
+extract_brew_packages() {
+    log_info "Extracting Homebrew packages..."
+    local brew_count=0
+    
+    if command -v brew >/dev/null 2>&1; then
+        # Get installed packages
+        while read -r package; do
+            [[ -z "$package" ]] && continue
+            
+            # Use generic description for speed (avoid slow brew info calls)
+            local description="Homebrew package"
+            
+            cat > "$HELP_DIR/brew/${package}.txt" << EOF
+PACKAGE: $package
+
+DESCRIPTION:
+  $description
+
+USAGE:
+  $package [options]
+
+TYPE: Homebrew Package
+SOURCE: brew list
+INSTALL: brew install $package
+EOF
+            ((brew_count++))
+        done < <(brew list 2>/dev/null)
+    fi
+    
+    log_success "Extracted documentation for $brew_count Homebrew packages"
+}
+
+# Extract npm global package documentation
+extract_npm_packages() {
+    log_info "Extracting npm global packages..."
+    local npm_count=0
+    
+    if command -v npm >/dev/null 2>&1; then
+        # Get globally installed packages (excluding npm itself and system packages)
+        while read -r line; do
+            if [[ "$line" =~ ^[├└]──[[:space:]]*(@?[^[:space:]]+)@([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+                local package="${BASH_REMATCH[1]}"
+                local version="${BASH_REMATCH[2]}"
+                
+                # Skip system packages
+                [[ "$package" == "npm" || "$package" == "corepack" ]] && continue
+                
+                # Sanitize package name for file system (replace / with -)
+                local safe_package_name="${package//\//-}"
+                
+                cat > "$HELP_DIR/packages/${safe_package_name}.txt" << EOF
+PACKAGE: $package
+
+DESCRIPTION:
+  npm global package (version $version)
+
+USAGE:
+  $package [options]
+
+TYPE: NPM Global Package
+SOURCE: npm list -g
+INSTALL: npm install -g $package
+EOF
+                ((npm_count++))
+            fi
+        done < <(npm list -g --depth=0 2>/dev/null | grep -E "^[├└]──")
+    fi
+    
+    log_success "Extracted documentation for $npm_count npm packages"
+}
+
+# Extract system utilities documentation
+extract_system_utils() {
+    log_info "Extracting common system utilities..."
+    local utils_count=0
+    
+    # Common utilities to document
+    local common_utils=(
+        "find" "grep" "sed" "awk" "sort" "uniq" "head" "tail" 
+        "curl" "wget" "rsync" "tar" "zip" "unzip" "gzip"
+        "ssh" "scp" "top" "ps" "kill" "df" "du" "free"
+        "which" "whereis" "file" "stat" "chmod" "chown"
+    )
+    
+    for util in "${common_utils[@]}"; do
+        if command -v "$util" >/dev/null 2>&1; then
+            local util_path
+            util_path=$(command -v "$util")
+            
+            cat > "$HELP_DIR/utils/${util}.txt" << EOF
+UTILITY: $util
+
+DESCRIPTION:
+  System utility
+
+USAGE:
+  $util [options] [arguments]
+
+TYPE: System Utility
+SOURCE: $util_path
+EOF
+            ((utils_count++))
+        fi
+    done
+    
+    log_success "Extracted documentation for $utils_count system utilities"
+}
+
+# Extract git-related commands
+extract_git_commands() {
+    log_info "Extracting git-related commands..."
+    local git_count=0
+    
+    if command -v git >/dev/null 2>&1; then
+        # Add main git command
+        cat > "$HELP_DIR/git/git.txt" << EOF
+COMMAND: git
+
+DESCRIPTION:
+  Git version control system
+
+USAGE:
+  git [options] <command> [args]
+
+TYPE: Version Control
+SOURCE: $(command -v git)
+EOF
+        ((git_count++))
+        
+        # Common git commands
+        local git_commands=(
+            "add" "commit" "push" "pull" "clone" "status" "log" "diff" 
+            "branch" "checkout" "merge" "rebase" "fetch" "remote" "tag"
+        )
+        
+        for cmd in "${git_commands[@]}"; do
+            cat > "$HELP_DIR/git/git-${cmd}.txt" << EOF
+COMMAND: git $cmd
+
+DESCRIPTION:
+  Git $cmd command
+
+USAGE:
+  git $cmd [options] [arguments]
+
+TYPE: Git Subcommand
+SOURCE: git
+EOF
+            ((git_count++))
+        done
+    fi
+    
+    log_success "Extracted documentation for $git_count git commands"
+}
+
+# Extract alias documentation  
+extract_alias_docs() {
+    log_info "Extracting alias documentation..."
+    local alias_count=0
+    
+    if [[ -f "$ALIAS_FILE" ]]; then
+        while read -r line; do
+            # Skip suffix aliases (alias -s) and commented lines
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if [[ "$line" =~ ^[[:space:]]*alias[[:space:]]+([^[:space:]-][^=]*)= ]]; then
+                local alias_name="${BASH_REMATCH[1]}"
+                
+                cat > "$HELP_DIR/aliases/${alias_name}.txt" << EOF
+ALIAS: $alias_name
+
+DESCRIPTION:
+  Shell alias
+
+USAGE:
+  $alias_name
+
+TYPE: Alias
+SOURCE: configs/alias.sh
+EOF
+                ((alias_count++))
+            fi
+        done < "$ALIAS_FILE"
+    fi
+    
+    log_success "Extracted documentation for $alias_count aliases"
+}
+
+# Build search index
+build_index() {
+    log_info "Building search index..."
+    
+    # Create TSV header
+    echo -e "command\tcategory\ttype\tfile\tdescription" > "$INDEX_FILE"
+    
+    local total_entries=0
+    for category_dir in "$HELP_DIR"/*; do
+        [[ -d "$category_dir" ]] || continue
+        local category=$(basename "$category_dir")
+        
+        for help_file in "$category_dir"/*.txt; do
+            [[ -f "$help_file" ]] || continue
+            local command=$(basename "$help_file" .txt)
+            
+            # Extract type from help file
+            local type=""
+            if grep -q "^TYPE: " "$help_file"; then
+                type=$(grep "^TYPE: " "$help_file" | cut -d' ' -f2-)
+            fi
+            
+            # Extract description from the help file if possible
+            local description="Shell ${type}"
+            if [[ -f "$help_file" ]] && grep -q "^DESCRIPTION:" "$help_file"; then
+                description=$(sed -n '/^DESCRIPTION:/,/^$/p' "$help_file" | tail -n +2 | head -1 | sed 's/^[[:space:]]*//')
+                [[ -z "$description" ]] && description="Shell ${type}"
+            fi
+            
+            echo -e "${command}\t${category}\t${type}\t${help_file}\t${description}" >> "$INDEX_FILE"
+            ((total_entries++))
+        done
+    done
+    
+    log_success "Built index with $total_entries entries"
+}
+
+# Record build timestamp
+record_build_time() {
+    echo "$(date +%s)" > "$TIMESTAMP_FILE"
+}
+
+# Main execution
+main() {
+    parse_args "$@"
+    
+    # Check if rebuild is actually needed
+    if ! needs_rebuild; then
+        exit 0
+    fi
+    
+    log_info "Starting shelp-build..."
+    
+    # Only clean if force rebuild
+    [[ "$FORCE_REBUILD" == "true" ]] && clean_docs
+    
+    init_help_structure
+    extract_function_docs
+    extract_alias_docs
+    extract_brew_packages
+    extract_npm_packages
+    extract_system_utils
+    extract_git_commands
+    build_index
+    record_build_time
+    
+    log_success "shelp-build completed successfully"
+    [[ "$QUIET_MODE" != "true" ]] && log_info "Use 'shelp' to access the help system"
+}
+
+# Execute main function
+main "$@"

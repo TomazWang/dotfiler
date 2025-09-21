@@ -1,0 +1,57 @@
+# !/bin/bash
+
+
+function formatc(){
+    pygmentize -f rtf $1 | pbcopy
+}
+
+function cat_code(){
+
+	if [ $# -le 0 ]; then 
+		echo "cat_code required at least one parameter."
+		return
+	fi
+
+
+	if [ $# -eq 1 ]; then 
+		pygmentize \
+			-f html \
+			-o snippt.html \
+			-O noclasses=true,style=monokai \
+			$1 && open snippt.html && \\rm --f snippt.html
+		
+		return
+	fi
+
+	language=''
+	style='monokai'
+
+	while [ "$1" != "" ]; do
+		case $1 in
+			-l | --lang | --language )
+				shift
+				language=$1
+				;;
+			-S | --style )
+				shift
+				style=$1
+				;;
+			* )
+				filename=$1
+				;;
+		esac
+		shift
+	done
+
+	pygmentize \
+		-f html \
+		-l $language \
+		-o snippt.html \
+		-O noclasses=true,style=$style \
+		$filename && open snippt.html && rm -f snippt.html
+
+	
+	unset -v filename
+	unset -v language
+	unset -v style
+}

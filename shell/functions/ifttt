@@ -1,0 +1,32 @@
+#!/bin/bash
+
+function ifttt(){
+
+    if [[ $# -eq 0 ]]; then
+        echo "$(<~/.function_support/ifttt_help.txt)" 
+        return
+    fi
+
+    event_name="$1"
+    value1="$2"
+    value2="$3"
+    value3="$4"
+
+
+    case $1 in
+        "help" )
+            echo "$(<~/.function_support/ifttt_help.txt)" 
+            return
+            ;;
+        "line_hello" )
+            if [ -z "$value1" ]; then
+                value1="Hello World!"
+            fi
+            ;;
+    esac
+
+    json="{\"value1\":\"$value1\",\"value2\":\"$value2\",\"value3\":\"$value3\"}"
+    echo $json
+    curl -X POST -H "Content-Type: application/json" -d "$json" https://maker.ifttt.com/trigger/"$1"/with/key/bTj8X1RCAfA-h-gbbtdQuw
+}
+

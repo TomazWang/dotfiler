@@ -1,0 +1,132 @@
+#! /bin/bash -x
+
+##################################################################################
+# sudo ./leavemealone.sh down
+##################################################################################
+
+function genocide () {
+  pgrep iCoreService_av | xargs kill -9 > /dev/null 2>&1
+}
+
+function up () {
+  launchctl enable system/com.trendmicro.icore.av
+  launchctl enable system/com.trendmicro.icore.ec
+  launchctl enable system/com.trendmicro.icore.main
+  launchctl enable system/com.trendmicro.icore.wp
+  launchctl enable system/com.trendmicro.tmsm.launcher
+  launchctl enable system/com.trendmicro.tmsm.plugin
+  launchctl enable system/com.trendmicro.wfbss.rp
+
+  launchctl load /Library/LaunchDaemons/com.trendmicro.icore.av.plist
+  launchctl load /Library/LaunchDaemons/com.trendmicro.icore.ec.plist
+  launchctl load /Library/LaunchDaemons/com.trendmicro.icore.main.plist
+  launchctl load /Library/LaunchDaemons/com.trendmicro.icore.wp.plist
+  launchctl load /Library/LaunchDaemons/com.trendmicro.tmsm.launcher.plist
+  launchctl load /Library/LaunchDaemons/com.trendmicro.tmsm.plugin.plist
+  launchctl load /Library/LaunchDaemons/com.trendmicro.wfbss.rp.plist
+  cd "/Library/Application Support/TrendMicro/TmccMac"
+  open TmLoginMgr.app/
+}
+
+function down () {
+
+  echo "=== unload trendmicro"
+
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.av.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.av.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.ec.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.ec.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.main.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.main.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.wp.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.icore.wp.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.tmsm.launcher.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.tmsm.launcher.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.tmsm.plugin.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.tmsm.plugin.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.trendmicro.wfbss.rp.plist"
+  launchctl unload /Library/LaunchDaemons/com.trendmicro.wfbss.rp.plist
+  
+  echo "launchctl disable system/com.trendmicro.icore.av"
+  launchctl disable system/com.trendmicro.icore.av
+  echo "launchctl disable system/com.trendmicro.icore.ec"
+  launchctl disable system/com.trendmicro.icore.ec
+  echo "launchctl disable system/com.trendmicro.icore.main"
+  launchctl disable system/com.trendmicro.icore.main
+  echo "launchctl disable system/com.trendmicro.icore.wp"
+  launchctl disable system/com.trendmicro.icore.wp
+  echo "launchctl disable system/com.trendmicro.tmsm.launcher"
+  launchctl disable system/com.trendmicro.tmsm.launcher
+  echo "launchctl disable system/com.trendmicro.tmsm.plugin"
+  launchctl disable system/com.trendmicro.tmsm.plugin
+  echo "launchctl disable system/com.trendmicro.wfbss.rp"
+  launchctl disable system/com.trendmicro.wfbss.rp
+
+  echo "=== unload landesk"
+
+  echo "launchctl unload /Library/LaunchDaemons/com.landesk.ldwatch.plist"
+  launchctl unload /Library/LaunchDaemons/com.landesk.ldwatch.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.landesk.scheduler.plist"
+  launchctl unload /Library/LaunchDaemons/com.landesk.scheduler.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.landesk.ldtmc.plist"
+  launchctl unload /Library/LaunchDaemons/com.landesk.ldtmc.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.landesk.remote.plist"
+  launchctl unload /Library/LaunchDaemons/com.landesk.remote.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.landesk.dispatch.plist"
+  launchctl unload /Library/LaunchDaemons/com.landesk.dispatch.plist
+  echo "launchctl unload /Library/LaunchDaemons/com.landesk.dispatch.plist"
+  launchctl unload /Library/LaunchDaemons/com.landesk.dispatch.plist
+
+  echo "launchctl disable com.landesk.lockscreen"
+  launchctl disable system/com.landesk.lockscreen
+  echo "launchctl disable com.landesk.ldusermenu"
+  launchctl disable system/com.landesk.ldusermenu
+  echo "launchctl disable com.landesk.dispatch.ui"
+  launchctl disable system/com.landesk.dispatch.ui
+  echo "launchctl disable com.landesk.dispatch.sui"
+  launchctl disable system/com.landesk.dispatch.sui
+
+
+
+  echo "kiling process"
+
+  echo "killall -9 TmLoginMgr"
+  killall -9 TmLoginMgr
+  echo "killall -9 UIMgmt"
+  killall -9 UIMgmt
+  echo "killall -9 MainUI"
+  killall -9 MainUI
+  echo "killall -9 iCoreService"
+  killall -9 iCoreService
+  echo "killall -9 iCoreService_av"
+  killall -9 iCoreService_av
+  echo "killall -9 iCoreService_wp"
+  killall -9 iCoreService_wp
+  echo "killall -9 iCoreService_tmsm"
+  killall -9 iCoreService_tmsm
+  echo "killall -9 ldscheduler"
+  killall -9 ldscheduler
+
+  echo "pkill -x \"Ivanti Agent\""
+  pkill -x "Ivanti Agent"
+  echo "pkill -x \"Ivanti Agent\""
+  pkill -x ldslm
+  echo "pkill -X com.trendmicro.icore.es"
+  pkill -x com.trendmicro.icore.es
+
+
+} 
+
+# while :
+# do
+#   sleep 1
+#   genocide
+# done
+
+command=$1
+
+if [[ "$1" == "down" ]]; then
+  echo "down" && down
+else
+  echo "up" && up
+fi

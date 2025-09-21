@@ -1,0 +1,63 @@
+#!/bin/bash
+
+function errLog(){
+
+    ts=$(date "-%Y%m%D_%H%M%S")
+    filename=$1+"_"+ts+".errLog"
+    touch $filename
+    vim $filename
+
+}
+
+alias 'zip_apk'='py ~/Dev/Py/shell_fucntion/zip_apk.py'
+: << 'zip_apk'
+function zip_apk(){
+
+    target=""
+
+    while [ "$1" != "" ]; do
+        case $1 in
+            -t | --target )
+                shift
+                target=$1
+                ;;
+            * )
+                if [ -f "$1" ]; then
+                    target=$1
+                fi
+                ;;
+        esac
+        shift
+    done
+
+    if [ "$target" != "" ]; then
+        file_name=$target 
+    else
+        file_name=$(find *.apk  -type f | sort -r | head -n 1)
+    fi
+    new_name=$(echo $file_name | awk '{split($0,a,"-"); print "TPOS-"a[3]"-"a[4]}')
+    cp $file_name $new_name".apk"
+    zip $new_name".zip" $new_name".apk"
+}
+zip_apk
+
+: <<'long_comment'
+function parse_chr(){
+    
+    output=""
+    target=""
+    while [ "$1" != ""]; do
+        case $1 in
+            -o | --output )
+                shift
+                output=$1   
+            * ) 
+                if [-f "$1"]; then
+                    target=$1
+                fi
+                ;;
+        esac
+        shift
+    done
+}
+long_comment

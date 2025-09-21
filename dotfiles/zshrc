@@ -1,0 +1,111 @@
+# Set to 1 to enable verbose logging, 0 to disable
+ZSHRC_VERBOSE=0
+
+log_zshrc() {
+  [ "$ZSHRC_VERBOSE" = "1" ] && echo "[ZSHRC] $1"
+}
+
+# Path to your oh-my-zsh configuration.
+log_zshrc "Setting up oh-my-zsh paths..."
+export ZSH=$HOME/.oh-my-zsh
+export ZSH_CUSTOM="$ZSH/custom"
+log_zshrc "Oh-my-zsh paths set."
+
+# Brew shell environment
+log_zshrc "Setting up Homebrew environment..."
+if test -f "/opt/homebrew/bin/brew"; then
+    eval $(/opt/homebrew/bin/brew shellenv) 2>/dev/null || echo "Warning: Failed to set up Homebrew environment"
+else
+    echo "/opt/homebrew/bin/brew not found"
+fi
+log_zshrc "Homebrew environment set."
+
+# =========== Look and feel ===============
+log_zshrc "Setting look and feel..."
+ZSH_THEME="spaceship"
+DISABLE_AUTO_TITLE="true"
+ENABLE_CORRECTION="true"
+log_zshrc "Look and feel set."
+
+# ============ Plugins ============
+log_zshrc "Setting plugins..."
+plugins=(git gitfast zsh-syntax-highlighting)
+log_zshrc "Plugins set."
+
+# ============ Init oh-my-zsh ================
+log_zshrc "Sourcing oh-my-zsh..."
+if [ -f "$ZSH/oh-my-zsh.sh" ]; then
+    source $ZSH/oh-my-zsh.sh
+else
+    echo "Warning: oh-my-zsh not found at $ZSH"
+fi
+log_zshrc "Finished sourcing oh-my-zsh."
+
+# ============ Shell dotfiles =================
+log_zshrc "Sourcing shell dotfiles (apply.sh)..."
+if [ -f "$HOME/.shell/apply.sh" ]; then
+    source $HOME/.shell/apply.sh
+else
+    echo "Warning: .shell/apply.sh not found"
+fi
+log_zshrc "Finished sourcing shell dotfiles."
+
+# Register the brew auto-update function to run before each prompt
+log_zshrc "Registering brew auto-update hook..."
+autoload -U add-zsh-hook 2>/dev/null || echo "Warning: Failed to load add-zsh-hook"
+add-zsh-hook precmd _update_brewfile_if_needed 2>/dev/null || echo "Warning: Failed to add brew auto-update hook"
+log_zshrc "Brew auto-update hook registered."
+
+# Source local extra (private) settings if exists
+log_zshrc "Sourcing .zsh.local if exists..."
+[ -f ~/.zsh.local ] && source ~/.zsh.local
+log_zshrc "Finished sourcing .zsh.local."
+
+# ============ Third-Party Integrations ============
+log_zshrc "Sourcing third-party integrations..."
+# Source scripts from the vendor directory
+[ -f "$HOME/.shell/vendor/forgit.zsh" ] && source $HOME/.shell/vendor/forgit.zsh
+[ -f "$HOME/.shell/vendor/z.sh" ] && source $HOME/.shell/vendor/z.sh
+[ -f "$HOME/.shell/vendor/zsh-interactive-cd.zsh" ] && source $HOME/.shell/vendor/zsh-interactive-cd.zsh
+log_zshrc "Finished sourcing vendor scripts."
+
+# iTerm2
+log_zshrc "Sourcing iTerm2 integration..."
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+log_zshrc "Finished sourcing iTerm2 integration."
+
+# fzf
+log_zshrc "Sourcing fzf..."
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_DEFAULT_OPTS='''
+--color fg:188,bg:233,hl:103,fg+:222,bg+:234,hl+:104
+--color info:183,prompt:110,spinner:107,pointer:167,marker:215
+'''
+log_zshrc "Finished sourcing fzf."
+
+# Google Cloud SDK
+log_zshrc "Sourcing Google Cloud SDK..."
+if [ -f '/Users/tomazwang/google-cloud-sdk/path.zsh.inc' ]; then 
+    . '/Users/tomazwang/google-cloud-sdk/path.zsh.inc' 2>/dev/null || echo "Warning: Failed to load Google Cloud SDK path"
+fi
+if [ -f '/Users/tomazwang/google-cloud-sdk/completion.zsh.inc' ]; then 
+    . '/Users/tomazwang/google-cloud-sdk/completion.zsh.inc' 2>/dev/null || echo "Warning: Failed to load Google Cloud SDK completion"
+fi
+log_zshrc "Finished sourcing Google Cloud SDK."
+
+# SDKMAN
+log_zshrc "Sourcing SDKMAN..."
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh" 2>/dev/null || echo "Warning: Failed to load SDKMAN"
+log_zshrc "Finished sourcing SDKMAN."
+
+# Fig post block. Keep at the bottom of this file.
+log_zshrc "Sourcing Fig post block..."
+[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
+log_zshrc "Finished Fig post block."
+
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+log_zshrc "Sourcing .local/bin/env if exists..."
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env" 2>/dev/null || echo "Warning: Failed to load .local/bin/env"
+log_zshrc "Finished sourcing .local/bin/env."
+

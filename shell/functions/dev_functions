@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function avd_proxy(){
+
+  if [ "$#" -eq 2 ]; then
+    name=$1
+    port=$2
+  elif [ "$#" -eq 1 ]; then
+    name=$1
+    port='8888'
+  else 
+    echo 'avd name required'
+    return
+  fi
+
+  localhost=$(ipconfig getifaddr en0)
+
+  $ANDROID_SDK/emulator/emulator -avd $name -http-proxy http://$localhost:$port
+
+}
+
+
+function pythia_log(){
+  kubectl logs --tail 20 -f $(kubectl get pods | ack -i "^pythia-" | awk '{print $1}')
+}
+
+function coden(){
+  filename=$(uuidgen)
+  code -n "~/tmp/${filename}"
+}
