@@ -12,7 +12,7 @@ log_shell() {
 # set -e
 
 # Define the dotfiles directory
-DOTFILES_DIR="$HOME/dev/dotfiler"
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Function to source files if they exist and are readable
 source_if_exists() {

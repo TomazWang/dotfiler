@@ -5,7 +5,7 @@
 set -e
 
 # Define the dotfiles directory
-DOTFILES_DIR="$HOME/dev/dotfiler"
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Ensure Homebrew is in PATH
 export PATH="/opt/homebrew/bin:$PATH"

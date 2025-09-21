@@ -38,4 +38,6 @@ export EDITOR=$(which vim)
 export SDKMAN_DIR="$HOME/.sdkman"
 
 # Add the bin directory to the PATH
-export PATH="$HOME/dev/dotfiler/bin:$PATH"
+# Get the dotfiler root directory (relative to this script's location)
+DOTFILER_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+export PATH="$DOTFILER_ROOT/bin:$PATH"
