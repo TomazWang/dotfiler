@@ -1,0 +1,48 @@
+# Ghostty Terminal Configuration
+# Migrated from iTerm2 "Main Dracula" profile
+
+# Appearance - Dracula Theme
+theme = "Dracula"
+background-opacity = 1.0
+window-padding-x = 10
+window-padding-y = 10
+
+# Font configuration (matching iTerm2)
+font-family = "RobotoMono Nerd Font"
+font-size = 16
+font-thicken = true
+
+# Window behavior
+window-inherit-working-directory = true
+window-inherit-font-size = true
+confirm-close-surface = false
+
+# Cursor (matching iTerm2 - no blinking)
+cursor-style = block
+cursor-style-blink = false
+
+# Colors and visual
+adjust-cursor-thickness = 2
+minimum-contrast = 1.0
+
+# Shell integration
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title
+
+# Key bindings (macOS style)
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_surface
+keybind = cmd+shift+left=previous_tab
+keybind = cmd+shift+right=next_tab
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+zero=reset_font_size
+keybind = cmd+shift+d=new_split:right
+keybind = cmd+d=new_split:down
+
+# Mouse
+mouse-hide-while-typing = true
+copy-on-select = false
+
+# Advanced
+gtk-single-instance = false

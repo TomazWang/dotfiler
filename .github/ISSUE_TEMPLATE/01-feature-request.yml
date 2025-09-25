@@ -1,0 +1,107 @@
+name: 🚀 Feature Request
+description: Propose a new feature or enhancement for dotfiler
+title: "[FEATURE]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please provide detailed information to help us understand your request.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Describe the feature you'd like to see added or enhanced
+      placeholder: A clear and concise description of what you want to happen...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case / Problem
+      description: What problem would this feature solve? What's your use case?
+      placeholder: Explain the problem you're trying to solve or the workflow this would improve...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which area of dotfiler does this feature relate to?
+      options:
+        - Shell Configuration (aliases, functions, environment)
+        - Installation & Setup (install.sh, symlinks)
+        - Scripts & Tools (shell/scripts, bin/)
+        - Package Management (Brewfile, dependencies)
+        - Documentation & Help
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      description: How does dotfiler currently handle this scenario?
+      placeholder: Describe what currently happens...
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How do you envision this feature working?
+      placeholder: Describe your ideal solution...
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative approaches or workarounds?
+      placeholder: Describe any alternatives you've considered...
+
+  - type: checkboxes
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environments should this feature support?
+      options:
+        - label: macOS
+        - label: Linux
+        - label: zsh
+        - label: bash
+        - label: Other shells (specify in additional context)
+
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: Implementation Suggestions
+      description: Do you have any ideas about how this could be implemented?
+      placeholder: Any technical suggestions, file locations, or approaches...
+
+  - type: textarea
+    id: related-issues
+    attributes:
+      label: Related Issues/PRs
+      description: Are there any related issues or pull requests?
+      placeholder: "#123, #456, or links to related discussions..."
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Anything else you'd like to add?
+      placeholder: Screenshots, examples, references, etc...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested
+          required: true
+        - label: This feature aligns with dotfiler's zero-magic, portable-first philosophy
+          required: true

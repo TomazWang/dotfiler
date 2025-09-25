@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(source:*)",
-      "Bash(echo $PATH)"
+      "Bash(echo $PATH)",
+      "Bash(gh issue list:*)"
     ],
     "deny": [],
     "ask": []
