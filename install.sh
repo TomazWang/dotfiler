@@ -67,6 +67,19 @@ info "Step 3: Creating symbolic links..."
 info "Linking $DOTFILES_DIR/dotfiles/zshrc to $HOME/.zshrc"
 ln -sfv "$DOTFILES_DIR/dotfiles/zshrc" "$HOME/.zshrc"
 
+# Link git configuration
+info "Linking $DOTFILES_DIR/dotfiles/gitconfig to $HOME/.gitconfig"
+ln -sfv "$DOTFILES_DIR/dotfiles/gitconfig" "$HOME/.gitconfig"
+
+# Link Node version (fnm/nvm)
+info "Linking $DOTFILES_DIR/dotfiles/nvmrc to $HOME/.nvmrc"
+ln -sfv "$DOTFILES_DIR/dotfiles/nvmrc" "$HOME/.nvmrc"
+
+# Link Python version (pyenv)
+info "Linking $DOTFILES_DIR/dotfiles/python-version to $HOME/.pyenv/version"
+mkdir -p "$HOME/.pyenv"
+ln -sfv "$DOTFILES_DIR/dotfiles/python-version" "$HOME/.pyenv/version"
+
 # Create ~/.config directory if it doesn't exist
 mkdir -p "$HOME/.config"
 
@@ -74,9 +87,7 @@ mkdir -p "$HOME/.config"
 info "Linking $DOTFILES_DIR/dotfiles/ghostty to $HOME/.config/ghostty"
 ln -sfv "$DOTFILES_DIR/dotfiles/ghostty" "$HOME/.config/ghostty"
 
-# Link other dotfiles as needed (example)
-# info "Linking $DOTFILES_DIR/dotfiles/gitconfig to $HOME/.gitconfig"
-# ln -sfv "$DOTFILES_DIR/dotfiles/gitconfig" "$HOME/.gitconfig"
+# Additional dotfiles can be added here as needed
 
 STEP_END=$(date +%s)
 info "Step 3 complete. Duration: $((STEP_END - STEP_START)) seconds."

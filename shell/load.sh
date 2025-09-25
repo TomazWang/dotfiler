@@ -12,7 +12,16 @@ log_shell() {
 # set -e
 
 # Define the dotfiles directory
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Auto-detect dotfiles directory (works in both bash and zsh)
+if [[ -n "${BASH_SOURCE[0]}" ]]; then
+    DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+elif [[ -n "${(%):-%N}" ]]; then
+    # zsh-specific
+    DOTFILES_DIR="$(cd "$(dirname "${(%):-%N}")/.." && pwd)"
+else
+    # Fallback - assume we're in shell/ directory
+    DOTFILES_DIR="$(cd .. && pwd)"
+fi
 
 # Function to source files if they exist and are readable
 source_if_exists() {

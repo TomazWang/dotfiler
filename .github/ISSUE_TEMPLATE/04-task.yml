@@ -1,0 +1,164 @@
+name: 📋 Task / Maintenance
+description: General project tasks, maintenance, refactoring, or improvements
+title: "[TASK]: "
+labels: ["task", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for general project tasks, maintenance work, refactoring, or improvements that don't fit the feature/bug categories.
+
+  - type: textarea
+    id: task-description
+    attributes:
+      label: Task Description
+      description: Describe the task or work that needs to be done
+      placeholder: A clear description of what needs to be accomplished...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: task-type
+    attributes:
+      label: Task Type
+      description: What type of task is this?
+      options:
+        - Refactoring / Code Cleanup
+        - Documentation
+        - Testing / Quality Assurance
+        - Performance Optimization
+        - Security Update
+        - Dependency Update
+        - Build / CI/CD
+        - Research / Investigation
+        - Maintenance
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this task?
+      options:
+        - High (should be done soon)
+        - Medium (normal priority)
+        - Low (when time permits)
+        - Nice to Have
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this task is?
+      options:
+        - Small (< 1 hour)
+        - Medium (1-4 hours)
+        - Large (1-2 days)
+        - Extra Large (> 2 days)
+        - Unknown (needs investigation)
+    validations:
+      required: true
+
+  - type: textarea
+    id: objectives
+    attributes:
+      label: Objectives / Goals
+      description: What are the specific objectives or goals of this task?
+      placeholder: |
+        - Objective 1
+        - Objective 2
+        - Objective 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know when this task is complete?
+      placeholder: |
+        - [ ] Criteria 1
+        - [ ] Criteria 2
+        - [ ] Criteria 3
+        - [ ] All tests pass
+        - [ ] Documentation updated (if applicable)
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-areas
+    attributes:
+      label: Affected Areas
+      description: Which parts of the codebase will this task impact?
+      placeholder: |
+        Files, directories, or components that will be modified:
+        - shell/functions/
+        - install.sh
+        - etc.
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there any dependencies on other tasks or issues?
+      placeholder: |
+        - Depends on #123
+        - Blocked by #456
+        - Related to #789
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Proposed Approach
+      description: Do you have any ideas about how to approach this task?
+      placeholder: Outline your proposed approach or methodology...
+
+  - type: textarea
+    id: testing-strategy
+    attributes:
+      label: Testing Strategy
+      description: How should this task be tested or validated?
+      placeholder: |
+        - Manual testing steps
+        - Automated tests to add/update
+        - Verification methods
+        - Cross-platform testing requirements
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Potential Risks / Concerns
+      description: Are there any risks or concerns with this task?
+      placeholder: |
+        - Breaking changes
+        - Performance impact
+        - Compatibility issues
+        - etc.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information?
+      placeholder: |
+        - Links to resources
+        - Background information
+        - Research findings
+        - Screenshots or examples
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have clearly defined the acceptance criteria
+          required: true
+        - label: I have considered the impact on existing functionality
+          required: true
+        - label: This task aligns with the project's goals and philosophy
+          required: true
