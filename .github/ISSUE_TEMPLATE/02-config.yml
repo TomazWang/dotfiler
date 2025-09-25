@@ -67,10 +67,8 @@ body:
       description: Check what applies (we'll assume macOS + zsh if unsure)
       options:
         - label: macOS
-          checked: true
         - label: Linux
         - label: zsh
-          checked: true
         - label: bash
         - label: All shells (zsh, bash, fish, etc.)
         - label: I need this to work everywhere
