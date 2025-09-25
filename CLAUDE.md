@@ -143,3 +143,4 @@ Each AI agent session should:
 - **STOP before Phase 3**: Don't move folder or initialize git
 
 Next AI agent will handle moving dotfiler to independent location and git setup.
+- never use git by yourself. I will do the git operations.
