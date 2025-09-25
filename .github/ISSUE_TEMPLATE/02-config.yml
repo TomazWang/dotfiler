@@ -50,6 +50,7 @@ body:
     attributes:
       label: What type of config is this? (optional)
       description: Choose the closest match, or skip if unsure
+      default: 0
       options:
         - I'm not sure
         - Alias or shortcut command

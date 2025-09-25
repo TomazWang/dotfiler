@@ -9,11 +9,16 @@ body:
         Have an idea for a new feature? Awesome! Keep it simple - we can work out the details together.
 
   - type: textarea
-    id: feature-description
+    id: what-you-want
     attributes:
-      label: Feature Description
-      description: Describe the feature you'd like to see added or enhanced
-      placeholder: A clear and concise description of what you want to happen...
+      label: What feature do you want?
+      description: Describe the feature or enhancement you'd like to see
+      placeholder: |
+        Examples:
+        - "A command to quickly switch between different git configurations"
+        - "Better organization of shell functions by category" 
+        - "Auto-backup of dotfiles before making changes"
+        - "Support for fish shell"
     validations:
       required: true
 
@@ -46,6 +51,7 @@ body:
     attributes:
       label: What area is this for? (optional)
       description: Choose the closest match
+      default: 0
       options:
         - I'm not sure
         - Shell setup (aliases, functions, environment)
