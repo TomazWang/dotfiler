@@ -6,159 +6,71 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for general project tasks, maintenance work, refactoring, or improvements that don't fit the feature/bug categories.
+        Got an idea for improving the project? Keep it simple - we can figure out the details together!
 
   - type: textarea
-    id: task-description
+    id: what-needs-doing
     attributes:
-      label: Task Description
-      description: Describe the task or work that needs to be done
-      placeholder: A clear description of what needs to be accomplished...
+      label: What needs to be done?
+      description: Describe the task or improvement
+      placeholder: |
+        Examples:
+        - "Clean up old functions that aren't used anymore"
+        - "Add better error messages to install.sh"
+        - "Update documentation for the new shell functions"
+        - "Reorganize the shell/configs directory"
+    validations:
+      required: true
+
+  - type: textarea
+    id: why-its-needed
+    attributes:
+      label: Why is this needed?
+      description: What problem does this solve or what would it improve?
+      placeholder: This would help because...
+
+  - type: textarea
+    id: how-to-know-its-done
+    attributes:
+      label: How will we know it's done?
+      description: What should be different when this is complete?
+      placeholder: |
+        When this is finished:
+        - [ ] Thing 1 should work
+        - [ ] Thing 2 should be updated
+        - [ ] Users should be able to...
     validations:
       required: true
 
   - type: dropdown
     id: task-type
     attributes:
-      label: Task Type
-      description: What type of task is this?
+      label: What kind of task? (optional)
+      description: Choose the closest match
+      default: 0
       options:
-        - Refactoring / Code Cleanup
+        - Not sure/Other
         - Documentation
-        - Testing / Quality Assurance
-        - Performance Optimization
-        - Security Update
-        - Dependency Update
-        - Build / CI/CD
-        - Research / Investigation
-        - Maintenance
-        - Other
-    validations:
-      required: true
-
-  - type: dropdown
-    id: priority
-    attributes:
-      label: Priority
-      description: How urgent is this task?
-      options:
-        - High (should be done soon)
-        - Medium (normal priority)
-        - Low (when time permits)
-        - Nice to Have
-    validations:
-      required: true
-
-  - type: dropdown
-    id: complexity
-    attributes:
-      label: Estimated Complexity
-      description: How complex do you think this task is?
-      options:
-        - Small (< 1 hour)
-        - Medium (1-4 hours)
-        - Large (1-2 days)
-        - Extra Large (> 2 days)
-        - Unknown (needs investigation)
-    validations:
-      required: true
+        - Testing/QA
+        - Performance/Security
+        - Tooling/Automation
+        - Research
 
   - type: textarea
-    id: objectives
+    id: additional-details
     attributes:
-      label: Objectives / Goals
-      description: What are the specific objectives or goals of this task?
+      label: Additional details (optional)
+      description: Anything else that might be helpful
       placeholder: |
-        - Objective 1
-        - Objective 2
-        - Objective 3
-    validations:
-      required: true
-
-  - type: textarea
-    id: acceptance-criteria
-    attributes:
-      label: Acceptance Criteria
-      description: How will we know when this task is complete?
-      placeholder: |
-        - [ ] Criteria 1
-        - [ ] Criteria 2
-        - [ ] Criteria 3
-        - [ ] All tests pass
-        - [ ] Documentation updated (if applicable)
-    validations:
-      required: true
-
-  - type: textarea
-    id: affected-areas
-    attributes:
-      label: Affected Areas
-      description: Which parts of the codebase will this task impact?
-      placeholder: |
-        Files, directories, or components that will be modified:
-        - shell/functions/
-        - install.sh
-        - etc.
-
-  - type: textarea
-    id: dependencies
-    attributes:
-      label: Dependencies
-      description: Are there any dependencies on other tasks or issues?
-      placeholder: |
-        - Depends on #123
-        - Blocked by #456
-        - Related to #789
-
-  - type: textarea
-    id: approach
-    attributes:
-      label: Proposed Approach
-      description: Do you have any ideas about how to approach this task?
-      placeholder: Outline your proposed approach or methodology...
-
-  - type: textarea
-    id: testing-strategy
-    attributes:
-      label: Testing Strategy
-      description: How should this task be tested or validated?
-      placeholder: |
-        - Manual testing steps
-        - Automated tests to add/update
-        - Verification methods
-        - Cross-platform testing requirements
-
-  - type: textarea
-    id: risks
-    attributes:
-      label: Potential Risks / Concerns
-      description: Are there any risks or concerns with this task?
-      placeholder: |
-        - Breaking changes
-        - Performance impact
-        - Compatibility issues
-        - etc.
-
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context
-      description: Any other relevant information?
-      placeholder: |
-        - Links to resources
-        - Background information
-        - Research findings
-        - Screenshots or examples
+        - Files or areas that might be affected
+        - Dependencies or related issues
+        - Ideas for how to approach this
+        - Potential risks or concerns
 
   - type: checkboxes
-    id: checklist
+    id: simple-checklist
     attributes:
-      label: Checklist
-      description: Please confirm the following
+      label: Quick check
       options:
-        - label: I have clearly defined the acceptance criteria
-          required: true
-        - label: I have considered the impact on existing functionality
-          required: true
-        - label: This task aligns with the project's goals and philosophy
+        - label: I've checked if this task exists in other issues
           required: true

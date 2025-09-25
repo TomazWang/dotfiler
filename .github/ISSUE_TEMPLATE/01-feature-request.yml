@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature! Please provide detailed information to help us understand your request.
+        Have an idea for a new feature? Awesome! Keep it simple - we can work out the details together.
 
   - type: textarea
     id: feature-description
@@ -18,90 +18,72 @@ body:
       required: true
 
   - type: textarea
-    id: use-case
+    id: why-you-want-it
     attributes:
-      label: Use Case / Problem
-      description: What problem would this feature solve? What's your use case?
-      placeholder: Explain the problem you're trying to solve or the workflow this would improve...
+      label: Why do you want this?
+      description: What problem would this solve or what workflow would it improve?
+      placeholder: This would help me because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: how-it-should-work
+    attributes:
+      label: How should it work?
+      description: Describe your ideal solution (high-level is fine)
+      placeholder: |
+        I imagine it would work like:
+        1. User does X
+        2. System responds with Y
+        3. Result is Z
+        
+        Or any ideas you have about implementation...
     validations:
       required: true
 
   - type: dropdown
     id: category
     attributes:
-      label: Category
-      description: Which area of dotfiler does this feature relate to?
+      label: What area is this for? (optional)
+      description: Choose the closest match
       options:
-        - Shell Configuration (aliases, functions, environment)
-        - Installation & Setup (install.sh, symlinks)
-        - Scripts & Tools (shell/scripts, bin/)
-        - Package Management (Brewfile, dependencies)
-        - Documentation & Help
+        - I'm not sure
+        - Shell setup (aliases, functions, environment)
+        - Installation and setup process
+        - Scripts and command-line tools
+        - Package management
+        - Documentation and help
         - Other
-    validations:
-      required: true
-
-  - type: textarea
-    id: current-behavior
-    attributes:
-      label: Current Behavior
-      description: How does dotfiler currently handle this scenario?
-      placeholder: Describe what currently happens...
-
-  - type: textarea
-    id: proposed-solution
-    attributes:
-      label: Proposed Solution
-      description: How do you envision this feature working?
-      placeholder: Describe your ideal solution...
-
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternative Solutions
-      description: Have you considered any alternative approaches or workarounds?
-      placeholder: Describe any alternatives you've considered...
 
   - type: checkboxes
     id: environment
     attributes:
-      label: Environment
-      description: Which environments should this feature support?
+      label: Environment (optional)
+      description: What should this work with?
       options:
         - label: macOS
+          checked: true
         - label: Linux
         - label: zsh
+          checked: true
         - label: bash
-        - label: Other shells (specify in additional context)
-
-  - type: textarea
-    id: implementation-ideas
-    attributes:
-      label: Implementation Suggestions
-      description: Do you have any ideas about how this could be implemented?
-      placeholder: Any technical suggestions, file locations, or approaches...
-
-  - type: textarea
-    id: related-issues
-    attributes:
-      label: Related Issues/PRs
-      description: Are there any related issues or pull requests?
-      placeholder: "#123, #456, or links to related discussions..."
+        - label: All shells/platforms
 
   - type: textarea
     id: additional-context
     attributes:
-      label: Additional Context
-      description: Anything else you'd like to add?
-      placeholder: Screenshots, examples, references, etc...
+      label: Anything else?
+      description: Examples, links, related issues, etc.
+      placeholder: |
+        - Examples from other tools
+        - Related issues: #123
+        - Screenshots or mockups
+        - Any other helpful context
 
   - type: checkboxes
-    id: checklist
+    id: simple-checklist
     attributes:
-      label: Checklist
-      description: Please confirm the following
+      label: Quick check
       options:
-        - label: I have searched existing issues to ensure this feature hasn't been requested
-          required: true
-        - label: This feature aligns with dotfiler's zero-magic, portable-first philosophy
+        - label: I've looked for this feature in existing issues
           required: true

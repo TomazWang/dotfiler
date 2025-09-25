@@ -6,181 +6,85 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for adding new configurations or modifying existing ones. This includes dotfiles, shell configs, aliases, functions, and environment settings.
+        Quick and simple way to add or modify configurations. Don't worry if you're not sure about technical details - we'll help figure it out!
 
   - type: textarea
-    id: config-description
+    id: what-you-want
     attributes:
-      label: Configuration Description
-      description: Describe the configuration you want to add or modify
-      placeholder: A clear description of what configuration needs to be added/changed...
-    validations:
-      required: true
-
-  - type: dropdown
-    id: config-type
-    attributes:
-      label: Configuration Type
-      description: What type of configuration is this?
-      options:
-        - Shell Configuration (aliases, exports, prompt)
-        - Shell Functions (custom commands, utilities)
-        - Application Dotfiles (git, vim, tmux, etc.)
-        - Environment Files (nvmrc, python-version, etc.)
-        - Package/Tool Configuration (Brewfile, tool-specific configs)
-        - Terminal/Shell Theme Configuration
-        - Other
-    validations:
-      required: true
-
-  - type: dropdown
-    id: config-location
-    attributes:
-      label: Target Location
-      description: Where should this configuration be placed?
-      options:
-        - "dotfiles/ (symlinked to home directory)"
-        - "shell/configs/ (sourced by load.sh)"
-        - "shell/functions/ (function definitions)"
-        - "packages/ (dependency management)"
-        - "New location (specify in details)"
-        - "Modify existing file"
-        - "Not sure (needs guidance)"
+      label: What do you want to configure?
+      description: Describe what you want to add or change
+      placeholder: |
+        Examples:
+        - "I want an alias for 'ls -la'"
+        - "I need my git to use a different editor"
+        - "I want to add a shortcut for docker commands"
+        - "I have a custom prompt I want to use"
     validations:
       required: true
 
   - type: textarea
     id: config-content
     attributes:
-      label: Configuration Content
-      description: Provide the actual configuration content or settings
+      label: Configuration (if you have it)
+      description: Paste your config here, or just describe what you want
       placeholder: |
-        # Paste your configuration here
-        # For example:
+        If you have the actual config:
         alias ll="ls -la"
-        export EDITOR="vim"
-        # or describe the settings you want
+        export EDITOR="code"
+        
+        Or just describe:
+        "I want a shortcut for listing files with details"
       render: shell
+
+  - type: textarea
+    id: why-you-want-it
+    attributes:
+      label: Why do you want this?
+      description: What problem does this solve or what workflow does it improve?
+      placeholder: This would help me because...
     validations:
       required: true
 
   - type: dropdown
-    id: config-source
+    id: config-type
     attributes:
-      label: Configuration Source
-      description: Where did you get this configuration?
+      label: What type of config is this? (optional)
+      description: Choose the closest match, or skip if unsure
       options:
-        - Personal workflow/preference
-        - Tool documentation/recommendation
-        - Community best practice
-        - Migrating from existing setup
-        - Other dotfiles repository
-        - Online tutorial/guide
-        - Work/team requirement
-    validations:
-      required: true
+        - I'm not sure
+        - Alias or shortcut command
+        - Environment variable or setting
+        - Shell function or script
+        - Application config file (git, tmux, etc.)
+        - Package or tool to install
+        - Other
 
   - type: checkboxes
-    id: portability
+    id: environment
     attributes:
-      label: Portability Requirements
-      description: Which platforms should this config support?
+      label: Environment (optional)
+      description: Check what applies (we'll assume macOS + zsh if unsure)
       options:
         - label: macOS
-        - label: Linux (Ubuntu/Debian)
-        - label: Linux (CentOS/RHEL)
-        - label: Other Unix systems
-        - label: Cross-platform compatibility required
-
-  - type: checkboxes
-    id: shell-compatibility
-    attributes:
-      label: Shell Compatibility
-      description: Which shells should this config work with?
-      options:
-        - label: zsh (primary)
+          checked: true
+        - label: Linux
+        - label: zsh
+          checked: true
         - label: bash
-        - label: fish
-        - label: Shell-agnostic
-        - label: Not applicable
+        - label: All shells (zsh, bash, fish, etc.)
+        - label: I need this to work everywhere
 
   - type: textarea
-    id: dependencies
+    id: additional-info
     attributes:
-      label: Dependencies & Requirements
-      description: Does this config require new packages, tools, or other dependencies?
-      placeholder: |
-        - Requires: brew install tool-name
-        - Depends on: existing function xyz
-        - Needs: environment variable ABC
-        - etc.
-
-  - type: textarea
-    id: existing-conflicts
-    attributes:
-      label: Existing Configuration Impact
-      description: Will this replace, modify, or conflict with existing configurations?
-      placeholder: |
-        - Replaces: current alias for 'ls'
-        - Modifies: shell/configs/exports.sh
-        - Conflicts with: existing .gitconfig
-        - Adds to: shell/functions/
-
-  - type: textarea
-    id: testing-verification
-    attributes:
-      label: Testing & Verification
-      description: How should we test that this configuration works correctly?
-      placeholder: |
-        - Test command: run 'alias' to verify
-        - Check behavior: ls should show colors
-        - Verify file: ~/.gitconfig contains new settings
-        - Cross-platform: test on macOS and Linux
-    validations:
-      required: true
-
-  - type: textarea
-    id: use-case
-    attributes:
-      label: Use Case / Benefits
-      description: Why is this configuration useful? What problem does it solve?
-      placeholder: Explain the benefits and use cases for this configuration...
-    validations:
-      required: true
-
-  - type: textarea
-    id: documentation-needs
-    attributes:
-      label: Documentation Updates
-      description: What documentation needs to be updated?
-      placeholder: |
-        - Update README.md with new feature
-        - Add to shell help (shelp)
-        - Document in CLAUDE.md
-        - No documentation needed
-
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context
-      description: Any other relevant information?
-      placeholder: |
-        - Screenshots of behavior
-        - Links to documentation
-        - Examples from other dotfiles
-        - Configuration history/background
+      label: Anything else?
+      description: Dependencies, conflicts, links, examples, etc.
+      placeholder: Optional - any other details that might be helpful...
 
   - type: checkboxes
-    id: checklist
+    id: simple-checklist
     attributes:
-      label: Checklist
-      description: Please confirm the following
+      label: Quick check
       options:
-        - label: I have tested this configuration in my local environment
-          required: true
-        - label: This configuration follows dotfiler's zero-magic philosophy
-          required: true
-        - label: I have considered cross-platform compatibility
-          required: true
-        - label: I have checked for conflicts with existing configurations
+        - label: I've looked for this config in existing issues
           required: true
