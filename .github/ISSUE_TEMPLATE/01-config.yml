@@ -6,7 +6,23 @@ body:
   - type: markdown
     attributes:
       value: |
-        Quick and simple way to add or modify configurations. Don't worry if you're not sure about technical details - we'll help figure it out!
+        Quick and simple way to add or modify configurations.
+  - type: dropdown
+    id: config-type
+    attributes:
+      label: What type of config is this?
+      description: Choose the closest match, or skip if unsure
+      default: 0
+      options:
+        - I'm not sure
+        - Alias or shortcut command
+        - Environment variable or setting
+        - Shell function or script
+        - Application config file (git, tmux, etc.)
+        - Package or tool to install
+        - Other
+      validations:
+        required: true
 
   - type: textarea
     id: what-you-want
@@ -35,43 +51,6 @@ body:
         Or just describe:
         "I want a shortcut for listing files with details"
       render: shell
-
-  - type: textarea
-    id: why-you-want-it
-    attributes:
-      label: Why do you want this?
-      description: What problem does this solve or what workflow does it improve?
-      placeholder: This would help me because...
-    validations:
-      required: true
-
-  - type: dropdown
-    id: config-type
-    attributes:
-      label: What type of config is this? (optional)
-      description: Choose the closest match, or skip if unsure
-      default: 0
-      options:
-        - I'm not sure
-        - Alias or shortcut command
-        - Environment variable or setting
-        - Shell function or script
-        - Application config file (git, tmux, etc.)
-        - Package or tool to install
-        - Other
-
-  - type: checkboxes
-    id: environment
-    attributes:
-      label: Environment (optional)
-      description: Check what applies (we'll assume macOS + zsh if unsure)
-      options:
-        - label: macOS
-        - label: Linux
-        - label: zsh
-        - label: bash
-        - label: All shells (zsh, bash, fish, etc.)
-        - label: I need this to work everywhere
 
   - type: textarea
     id: additional-info
