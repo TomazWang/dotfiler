@@ -3,7 +3,9 @@
     "allow": [
       "Bash(source:*)",
       "Bash(echo $PATH)",
-      "Bash(gh issue list:*)"
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr comment:*)"
     ],
     "deny": [],
     "ask": []
