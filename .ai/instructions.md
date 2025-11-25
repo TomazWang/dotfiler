@@ -4,6 +4,36 @@
 
 Dotfiler is a **zero-magic, portable dotfiles management system** for macOS/Linux. This is a **migration-in-progress** from `~/.shell` to a cleaner structure. The project prioritizes explicit operations, portability, and preserving all existing functionality.
 
+## AI Behavior Rules
+
+### CRITICAL: Verify Before Advising
+
+**ALWAYS follow this protocol when answering questions:**
+
+1. **Check actual state FIRST** - Run diagnostic commands before giving advice
+2. **Show evidence** - State what you verified: "I checked X by running Y, found Z"
+3. **No assumptions** - Don't assume "typical" setups, especially during migration
+4. **Respect documentation** - Read README.md and linked docs before contradicting them
+5. **Test changes** - After edits, verify they work (run commands, check output)
+
+**For this migration-in-progress project:**
+- ❌ **NEVER assume** old `~/.shell` vs new `dotfiler` paths without checking
+- ❌ **NEVER say** "you don't need to run X" without verifying current state
+- ✅ **ALWAYS check** symlink locations: `ls -la ~/.zshrc`, `ls -la ~/.gitconfig`
+- ✅ **ALWAYS verify** which config is loaded: `which command`, `alias command`
+- ✅ **ALWAYS read** README.md and linked documentation before giving setup advice
+
+**Evidence-based response pattern:**
+```
+1. [Run diagnostic commands]
+2. [Analyze results]
+3. [Give advice based on evidence]
+4. [Make changes if needed]
+5. [Verify changes worked]
+```
+
+**When uncertain:** Say "Let me check..." then gather evidence. Never fake confidence.
+
 ## Architecture
 
 ### File Organization (Purpose-Based)
