@@ -94,6 +94,46 @@ dotfiler/
 - **Homebrew** (installed automatically if missing)
 - **zsh shell** (with oh-my-zsh)
 
+## Troubleshooting
+
+### When to Run install.sh
+
+Run `./install.sh` if:
+- ✅ Initial setup on a new machine
+- ✅ Symlinks are broken or pointing to wrong locations
+- ✅ After moving the dotfiler directory
+- ✅ Missing dotfiles in home directory
+
+**To check if symlinks are correct:**
+```bash
+ls -la ~/.zshrc    # Should point to /path/to/dotfiler/dotfiles/zshrc
+ls -la ~/.gitconfig # Should point to /path/to/dotfiler/dotfiles/gitconfig
+```
+
+**Don't run install.sh if:**
+- ❌ Just editing config files (use `reload` instead)
+- ❌ Adding new functions or aliases (use `reload` instead)
+- ❌ Symlinks are already correct
+
+### Changes Not Taking Effect?
+
+1. **Check symlinks first:**
+   ```bash
+   ls -la ~/.zshrc
+   ```
+   If pointing to old location (e.g., `~/.shell/`), run `./install.sh`
+
+2. **For correct symlinks, just reload:**
+   ```bash
+   reload  # or: source ~/.zshrc
+   ```
+
+3. **Verify the change worked:**
+   ```bash
+   alias c        # Check alias definition
+   echo $EDITOR   # Check environment variable
+   ```
+
 ## Philosophy
 
 - **Zero Magic**: Every operation is explicit and debuggable
