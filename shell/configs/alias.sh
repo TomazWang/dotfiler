@@ -12,10 +12,10 @@ alias reload='. ~/.zshrc'
 alias _!!='sudo !!'
 
 # editor
-EDITOR=cursor
+EDITOR=code
 alias e=$EDITOR
 alias e.='e .'
-alias c='cursor'  
+alias c='code'
 alias c.='c .'
 alias cs='cursor'
 alias cs.='cs .'
