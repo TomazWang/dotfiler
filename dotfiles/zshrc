@@ -43,18 +43,26 @@ log_zshrc "Finished sourcing oh-my-zsh."
 
 # ============ Shell dotfiles =================
 log_zshrc "Sourcing shell dotfiles (load.sh)..."
-if [ -f "$HOME/dev/dotfiler/shell/load.sh" ]; then
-    source $HOME/dev/dotfiler/shell/load.sh
+# Auto-detect dotfiler directory by resolving the .zshrc symlink
+DOTFILER_ROOT="$(cd "$(dirname "$(readlink ~/.zshrc)")/.." && pwd)"
+if [ -f "$DOTFILER_ROOT/shell/load.sh" ]; then
+    source "$DOTFILER_ROOT/shell/load.sh"
+    log_zshrc "Sourced shell dotfiles from $DOTFILER_ROOT"
 else
-    echo "Warning: dotfiler/shell/load.sh not found"
+    echo "Warning: dotfiler/shell/load.sh not found at $DOTFILER_ROOT"
 fi
 log_zshrc "Finished sourcing shell dotfiles."
 
 # Register the brew auto-update function to run before each prompt
+# Note: This must be done AFTER sourcing shell dotfiles since the function is defined there
 log_zshrc "Registering brew auto-update hook..."
 autoload -U add-zsh-hook 2>/dev/null || echo "Warning: Failed to load add-zsh-hook"
-add-zsh-hook precmd _update_brewfile_if_needed 2>/dev/null || echo "Warning: Failed to add brew auto-update hook"
-log_zshrc "Brew auto-update hook registered."
+if typeset -f _update_brewfile_if_needed > /dev/null; then
+    add-zsh-hook precmd _update_brewfile_if_needed 2>/dev/null || echo "Warning: Failed to add brew auto-update hook"
+    log_zshrc "Brew auto-update hook registered."
+else
+    log_zshrc "Warning: _update_brewfile_if_needed function not found, skipping hook registration"
+fi
 
 # Source local extra (private) settings if exists
 log_zshrc "Sourcing .zsh.local if exists..."
@@ -63,10 +71,10 @@ log_zshrc "Finished sourcing .zsh.local."
 
 # ============ Third-Party Integrations ============
 log_zshrc "Sourcing third-party integrations..."
-# Source scripts from the vendor directory
-[ -f "$HOME/.shell/vendor/forgit.zsh" ] && source $HOME/.shell/vendor/forgit.zsh
-[ -f "$HOME/.shell/vendor/z.sh" ] && source $HOME/.shell/vendor/z.sh
-[ -f "$HOME/.shell/vendor/zsh-interactive-cd.zsh" ] && source $HOME/.shell/vendor/zsh-interactive-cd.zsh
+# Source scripts from the vendor directory (using auto-detected DOTFILER_ROOT)
+[ -f "$DOTFILER_ROOT/vendor/forgit.zsh" ] && source "$DOTFILER_ROOT/vendor/forgit.zsh"
+[ -f "$DOTFILER_ROOT/vendor/z.sh" ] && source "$DOTFILER_ROOT/vendor/z.sh"
+[ -f "$DOTFILER_ROOT/vendor/zsh-interactive-cd.zsh" ] && source "$DOTFILER_ROOT/vendor/zsh-interactive-cd.zsh"
 log_zshrc "Finished sourcing vendor scripts."
 
 # iTerm2
