@@ -43,10 +43,13 @@ log_zshrc "Finished sourcing oh-my-zsh."
 
 # ============ Shell dotfiles =================
 log_zshrc "Sourcing shell dotfiles (load.sh)..."
-if [ -f "$HOME/dev/dotfiler/shell/load.sh" ]; then
-    source $HOME/dev/dotfiler/shell/load.sh
+# Auto-detect dotfiler directory by resolving the .zshrc symlink
+DOTFILER_ROOT="$(cd "$(dirname "$(readlink ~/.zshrc)")/.." && pwd)"
+if [ -f "$DOTFILER_ROOT/shell/load.sh" ]; then
+    source "$DOTFILER_ROOT/shell/load.sh"
+    log_zshrc "Sourced shell dotfiles from $DOTFILER_ROOT"
 else
-    echo "Warning: dotfiler/shell/load.sh not found"
+    echo "Warning: dotfiler/shell/load.sh not found at $DOTFILER_ROOT"
 fi
 log_zshrc "Finished sourcing shell dotfiles."
 
