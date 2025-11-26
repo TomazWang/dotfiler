@@ -33,23 +33,26 @@ source ~/.zshrc
 Already have dotfiles? Bring them under management:
 
 ```bash
+# Interactive mode
 ./bring.sh
+# Wizard will prompt for file path, public/private, and confirmation
 
-# Interactive wizard will:
-# 1. Ask for file path
-# 2. Default to private (secure by default)
-# 3. Backup original
-# 4. Move to dotfiler
-# 5. Create symlink
-# 6. Update mappings.yaml
+# Command-line mode (automation-friendly)
+./bring.sh ~/.vimrc --public --yes
+./bring.sh ~/.aws/credentials ~/.aws/config --private --yes
 
-# Example:
-Enter path: ~/.config/claude/claude_desktop_config.json
-Is this PUBLIC? [y/N]: (press Enter for private)
-Accept suggested destination? [Y/n]: y
-Proceed? [y/N]: y
-Done!
+# Options:
+#   --private    Mark as private (default)
+#   --public     Mark as public
+#   --yes, -y    Auto-confirm all prompts
+#   --help, -h   Show usage examples
 ```
+
+**What it does:**
+1. Creates `.backup` of original file
+2. Moves file to dotfiler (public or private)
+3. Creates symlink at original location
+4. Updates mappings.yaml automatically
 
 ## What You Get
 
@@ -168,7 +171,7 @@ public:
 
 Already have dotfiles scattered around your system? Use `bring.sh` to adopt them:
 
-**Quick example:**
+**Interactive mode:**
 ```bash
 ./bring.sh
 
@@ -183,7 +186,28 @@ Proceed? [y/N]: y
 [✓] Updated mappings.yaml
 ```
 
-**What bring.sh does:**
+**Command-line mode (automation-friendly):**
+```bash
+# Single file
+./bring.sh ~/.vimrc --public --yes
+
+# Multiple files at once
+./bring.sh ~/.aws/credentials ~/.aws/config --private --yes
+
+# With spaces in path (use quotes)
+./bring.sh "~/Library/Application Support/Claude/config.json" --private --yes
+
+# View all options
+./bring.sh --help
+```
+
+**Options:**
+- `--private` - Mark as private dotfile (default)
+- `--public` - Mark as public dotfile
+- `--yes, -y` - Auto-confirm all prompts (no interaction)
+- `--help, -h` - Show detailed usage and examples
+
+**What it does:**
 1. **Backs up** original file (`.backup` - excluded from git)
 2. **Moves** file to dotfiler (private or public)
 3. **Creates symlink** from original location
@@ -192,10 +216,10 @@ Proceed? [y/N]: y
 
 **Features:**
 - Defaults to private (secure by default)
-- Smart destination suggestions
+- Smart destination suggestions based on file path
 - Always creates backup before moving
-- Interactive loop for multiple files
-- Verifies symlink after creation
+- Supports multiple files in one command
+- Handles paths with spaces correctly
 
 ### Managing Private/Sensitive Configs
 

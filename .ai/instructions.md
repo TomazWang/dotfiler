@@ -231,32 +231,43 @@ public:
 
 Use `./bring.sh` to adopt existing dotfiles:
 
-**Workflow:**
-1. Run `./bring.sh`
-2. Enter path to existing file
-3. Choose public/private (defaults to private)
-4. Confirm suggested destination
-5. Script automatically:
-   - Creates `.backup` of original
-   - Moves file to dotfiler
-   - Creates symlink back
-   - Updates `mappings.yaml`
+**Interactive mode:**
+```bash
+./bring.sh
+# Wizard prompts for file path, public/private, and confirmation
+```
+
+**Command-line mode (automation-friendly):**
+```bash
+# Single file
+./bring.sh ~/.vimrc --public --yes
+
+# Multiple files
+./bring.sh ~/.aws/credentials ~/.aws/config --private --yes
+
+# View all options
+./bring.sh --help
+```
+
+**Options:**
+- `--private` - Mark as private (default, secure by default)
+- `--public` - Mark as public
+- `--yes, -y` - Auto-confirm all prompts (no interaction)
+- `--help, -h` - Show usage and examples
+
+**What it does:**
+1. Creates `.backup` of original file
+2. Moves file to dotfiler (public or private)
+3. Creates symlink at original location
+4. Updates `mappings.yaml` automatically
+5. No install.sh needed - works immediately
 
 **Features:**
 - Defaults to private (secure by default)
 - Smart destination suggestions based on file path
-- Interactive wizard for multiple files
+- Supports multiple files in one command
+- Handles paths with spaces correctly
 - `.backup` files excluded from git
-
-**Example:**
-```bash
-./bring.sh
-Enter path: ~/.config/claude/claude_desktop_config.json
-Is this PUBLIC? [y/N]: (press Enter)
-→ Moved to dotfiles-private/claude-desktop/config.json
-→ Symlink created
-→ mappings.yaml updated
-```
 
 ### Managing Private/Sensitive Configs
 
