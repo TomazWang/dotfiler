@@ -27,3 +27,7 @@ dotfiles-private/
 # Generated platform-specific mappings (use mappings.template.yaml as source)
 mappings.yaml
 mappings.yaml.backup
+
+# Backup files created by bring.sh
+*.backup
+**/*.backup

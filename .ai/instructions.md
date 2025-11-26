@@ -40,8 +40,9 @@ Dotfiler is a **zero-magic, portable dotfiles management system** for macOS/Linu
 
 ```
 dotfiler/
-├── init.sh                 # 🎯 Initialize: generates platform-specific mappings.yaml
+├── init.sh                 # Initialize: generates platform-specific mappings.yaml
 ├── install.sh              # Install: creates symlinks from mappings.yaml
+├── bring.sh                # Bring existing files under management
 ├── mappings.template.yaml  # Template with all platforms (tracked in git)
 ├── mappings.yaml           # Generated config (git-ignored, user-editable)
 ├── dotfiles/               # Public dotfiles (tracked in git)
@@ -52,7 +53,7 @@ dotfiler/
 │   ├── claude-desktop-config.example.json
 │   ├── ssh-config.example
 │   └── aws-*.example
-├── dotfiles-private/       # 🔒 Private configs (git-ignored, optional)
+├── dotfiles-private/       # Private configs (git-ignored, optional)
 │   ├── claude-desktop/    # Claude Desktop MCP credentials
 │   ├── ssh/               # SSH config and keys
 │   └── aws/               # AWS credentials
@@ -226,10 +227,47 @@ public:
 
 **Regenerating:** Run `./init.sh` again if you move to different platform or want to reset.
 
+### Bringing Existing Files Under Management
+
+Use `./bring.sh` to adopt existing dotfiles:
+
+**Workflow:**
+1. Run `./bring.sh`
+2. Enter path to existing file
+3. Choose public/private (defaults to private)
+4. Confirm suggested destination
+5. Script automatically:
+   - Creates `.backup` of original
+   - Moves file to dotfiler
+   - Creates symlink back
+   - Updates `mappings.yaml`
+
+**Features:**
+- Defaults to private (secure by default)
+- Smart destination suggestions based on file path
+- Interactive wizard for multiple files
+- `.backup` files excluded from git
+
+**Example:**
+```bash
+./bring.sh
+Enter path: ~/.config/claude/claude_desktop_config.json
+Is this PUBLIC? [y/N]: (press Enter)
+→ Moved to dotfiles-private/claude-desktop/config.json
+→ Symlink created
+→ mappings.yaml updated
+```
+
 ### Managing Private/Sensitive Configs
 
 For credentials and sensitive data:
 
+**Option 1: Use bring.sh (recommended for existing files)**
+```bash
+./bring.sh  # Interactive adoption
+```
+
+**Option 2: Manual setup (for new configs)**
 1. **Create file**: `mkdir -p dotfiles-private/<app-name>` and add config file
 2. **Add mapping** in `mappings.yaml` (if not auto-generated):
    ```yaml

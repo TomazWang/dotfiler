@@ -51,10 +51,10 @@ All mappings are configured in **`mappings.yaml`**. Pre-configured mappings incl
 
 ## Security
 
-✅ `dotfiles-private/` is in `.gitignore` - safe for credentials
-✅ Only `.gitkeep` is tracked in git
-✅ All actual config files are ignored
-✅ Platform detection ensures correct paths
+- `dotfiles-private/` is in `.gitignore` - safe for credentials
+- Only `.gitkeep` is tracked in git
+- All actual config files are ignored
+- Platform detection ensures correct paths
 
 ## Need More Info?
 

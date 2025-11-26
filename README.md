@@ -4,12 +4,12 @@ A clean, organized dotfiles management system following zero-magic principles. P
 
 ## Features
 
-- **🔧 Auto-Detection**: Self-locating scripts work from any directory location
-- **📁 Organized Structure**: Files grouped by purpose, not file type
-- **🚀 One-Command Setup**: `./install.sh` handles everything
-- **🔄 Modular Loading**: Clear, predictable configuration loading
-- **📦 Dependency Management**: Centralized package management with Homebrew
-- **🛠️ Development Ready**: Includes shell functions, scripts, and development tools
+- **Auto-Detection**: Self-locating scripts work from any directory location
+- **Organized Structure**: Files grouped by purpose, not file type
+- **One-Command Setup**: `./install.sh` handles everything
+- **Modular Loading**: Clear, predictable configuration loading
+- **Dependency Management**: Centralized package management with Homebrew
+- **Development Ready**: Includes shell functions, scripts, and development tools
 
 ## Quick Start
 
@@ -26,6 +26,29 @@ cd ~/dotfiler
 
 # Start using (or reload current shell)
 source ~/.zshrc
+```
+
+### Bringing Existing Dotfiles
+
+Already have dotfiles? Bring them under management:
+
+```bash
+./bring.sh
+
+# Interactive wizard will:
+# 1. Ask for file path
+# 2. Default to private (secure by default)
+# 3. Backup original
+# 4. Move to dotfiler
+# 5. Create symlink
+# 6. Update mappings.yaml
+
+# Example:
+Enter path: ~/.config/claude/claude_desktop_config.json
+Is this PUBLIC? [y/N]: (press Enter for private)
+Accept suggested destination? [Y/n]: y
+Proceed? [y/N]: y
+Done!
 ```
 
 ## What You Get
@@ -52,8 +75,9 @@ source ~/.zshrc
 
 ```
 dotfiler/
-├── init.sh                 # 🎯 Initialize (generates platform-specific mappings.yaml)
+├── init.sh                 # Initialize (generates platform-specific mappings.yaml)
 ├── install.sh              # Install (creates symlinks from mappings.yaml)
+├── bring.sh                # Bring existing files under management
 ├── mappings.template.yaml  # Template with all platforms (tracked in git)
 ├── mappings.yaml           # Generated config (git-ignored, edit to customize)
 ├── dotfiles/               # Public dotfiles (tracked in git)
@@ -63,7 +87,7 @@ dotfiler/
 │   ├── claude-desktop-config.example.json
 │   ├── ssh-config.example
 │   └── aws-*.example
-├── dotfiles-private/       # 🔒 Private configs (git-ignored, optional)
+├── dotfiles-private/       # Private configs (git-ignored, optional)
 │   ├── claude-desktop/    # Claude Desktop MCP credentials
 │   ├── ssh/               # SSH config and keys
 │   └── aws/               # AWS credentials
@@ -139,6 +163,39 @@ public:
 # If you move to different OS or want to regenerate
 ./init.sh  # Detects new platform, regenerates mappings.yaml
 ```
+
+### Bringing Existing Files Under Management
+
+Already have dotfiles scattered around your system? Use `bring.sh` to adopt them:
+
+**Quick example:**
+```bash
+./bring.sh
+
+Enter path to bring: ~/.config/claude/claude_desktop_config.json
+Is this PUBLIC? [y/N]:  # Press Enter (defaults to private)
+Accept suggested destination? [Y/n]: y
+Proceed? [y/N]: y
+
+[✓] Created backup: ~/.config/claude/claude_desktop_config.json.backup
+[✓] Moved to: dotfiles-private/claude-desktop/config.json
+[✓] Created symlink
+[✓] Updated mappings.yaml
+```
+
+**What bring.sh does:**
+1. **Backs up** original file (`.backup` - excluded from git)
+2. **Moves** file to dotfiler (private or public)
+3. **Creates symlink** from original location
+4. **Updates** mappings.yaml automatically
+5. **No install.sh needed** - works immediately!
+
+**Features:**
+- Defaults to private (secure by default)
+- Smart destination suggestions
+- Always creates backup before moving
+- Interactive loop for multiple files
+- Verifies symlink after creation
 
 ### Managing Private/Sensitive Configs
 

@@ -12,10 +12,10 @@ The `dotfiles-private/` directory allows you to:
 
 ## Security Principles
 
-✅ **SAFE**: Files in `dotfiles-private/` are git-ignored
-✅ **SAFE**: Never committed to version control
-✅ **SAFE**: Only stored locally on your machine
-❌ **NOT SAFE**: For production system credentials (use secrets manager instead)
+**SAFE**: Files in `dotfiles-private/` are git-ignored
+**SAFE**: Never committed to version control
+**SAFE**: Only stored locally on your machine
+**NOT SAFE**: For production system credentials (use secrets manager instead)
 
 ## Quick Start
 
@@ -140,14 +140,14 @@ dotfiles-private/                    # Git-ignored, safe for credentials
 
 ## Best Practices
 
-### DO ✅
+### DO
 - Store API keys, tokens, passwords in `dotfiles-private/`
 - Use example templates in `dotfiles/` for documentation
 - Keep structure organized by application
 - Back up `dotfiles-private/` separately (encrypted backup)
 - Review what's being linked during `install.sh`
 
-### DON'T ❌
+### DON'T
 - Commit anything from `dotfiles-private/` to git
 - Store production system credentials (use proper secrets management)
 - Share `dotfiles-private/` publicly
