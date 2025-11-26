@@ -144,14 +144,14 @@ bring_file() {
     local is_private_preset="$2"  # Optional: "true", "false", or empty
     local auto_yes="$3"            # Optional: "true" or empty
 
+    # Expand ~ if present
+    source_path="${source_path/#\~/$HOME}"
+
     # Validate source exists
     if [ ! -e "$source_path" ] && [ ! -L "$source_path" ]; then
         error "Source does not exist: $source_path"
         return 1
     fi
-
-    # Expand ~ if present
-    source_path="${source_path/#\~/$HOME}"
 
     # Check if already a symlink pointing to dotfiler
     if [ -L "$source_path" ]; then
