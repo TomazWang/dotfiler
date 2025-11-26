@@ -19,3 +19,11 @@
 
 # OS generated files
 Thumbs.db
+
+# Private dotfiles - contains sensitive credentials and configs
+dotfiles-private/
+!dotfiles-private/.gitkeep
+
+# Generated platform-specific mappings (use mappings.template.yaml as source)
+mappings.yaml
+mappings.yaml.backup

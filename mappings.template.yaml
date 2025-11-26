@@ -1,0 +1,149 @@
+# Dotfiler Mappings Configuration
+#
+# This file defines which files should be symlinked and where.
+# Edit this file to customize your dotfiles setup.
+#
+# Format:
+#   - source: Path relative to dotfiles/ or dotfiles-private/
+#   - target: Absolute target path (use ~ for home directory)
+#   - platform: common (all platforms), macos, or linux
+#   - type: public (dotfiles/) or private (dotfiles-private/)
+#
+# Platform Detection:
+#   - The install script auto-detects your OS (macOS/Linux)
+#   - Only mappings for "common" or your current platform are applied
+#   - Use platform-specific mappings for different paths (e.g., macOS Library vs Linux .config)
+
+# ============================================================
+# PUBLIC DOTFILES (dotfiles/ directory - tracked in git)
+# ============================================================
+
+public:
+  # Shell Configuration
+  - source: zshrc
+    target: ~/.zshrc
+    platform: common
+
+  # Git Configuration
+  - source: gitconfig
+    target: ~/.gitconfig
+    platform: common
+
+  # Node Version Manager
+  - source: nvmrc
+    target: ~/.nvmrc
+    platform: common
+
+  # Python Version (pyenv)
+  - source: python-version
+    target: ~/.pyenv/version
+    platform: common
+
+  # Terminal Configuration (Ghostty)
+  - source: ghostty
+    target: ~/.config/ghostty
+    platform: common
+
+  # ===== Add Your Own Public Mappings Below =====
+  # Examples:
+  #
+  # - source: vimrc
+  #   target: ~/.vimrc
+  #   platform: common
+  #
+  # - source: tmux.conf
+  #   target: ~/.tmux.conf
+  #   platform: common
+
+
+# ============================================================
+# PRIVATE DOTFILES (dotfiles-private/ - git-ignored)
+# ============================================================
+
+private:
+  # Claude Desktop MCP Configuration
+  # macOS path
+  - source: claude-desktop/config.json
+    target: ~/Library/Application Support/Claude/claude_desktop_config.json
+    platform: macos
+
+  # Linux path (XDG Base Directory)
+  - source: claude-desktop/config.json
+    target: ~/.config/claude/claude_desktop_config.json
+    platform: linux
+
+  # SSH Configuration
+  - source: ssh/config
+    target: ~/.ssh/config
+    platform: common
+
+  # AWS Credentials
+  - source: aws/credentials
+    target: ~/.aws/credentials
+    platform: common
+
+  # AWS Configuration
+  - source: aws/config
+    target: ~/.aws/config
+    platform: common
+
+  # ===== Add Your Own Private Mappings Below =====
+  # Examples:
+  #
+  # GitHub CLI (platform-specific)
+  # - source: gh/config.yml
+  #   target: ~/Library/Application Support/GitHub CLI/config.yml
+  #   platform: macos
+  #
+  # - source: gh/config.yml
+  #   target: ~/.config/gh/config.yml
+  #   platform: linux
+  #
+  # GCP Service Account
+  # - source: gcp/service-account.json
+  #   target: ~/.config/gcloud/service-account.json
+  #   platform: common
+  #
+  # NPM Token
+  # - source: npm/npmrc
+  #   target: ~/.npmrc
+  #   platform: common
+  #
+  # Docker Configuration
+  # - source: docker/config.json
+  #   target: ~/.docker/config.json
+  #   platform: common
+  #
+  # Kubernetes Config
+  # - source: k8s/config
+  #   target: ~/.kube/config
+  #   platform: common
+
+
+# ============================================================
+# TIPS
+# ============================================================
+#
+# 1. Testing your changes:
+#    ./install.sh
+#
+# 2. Platform-specific mappings:
+#    - Use "macos" for macOS-only paths
+#    - Use "linux" for Linux-only paths
+#    - Use "common" for paths that work on both
+#
+# 3. Target path expansion:
+#    - ~ is expanded to your home directory
+#    - $HOME works too
+#    - Use absolute paths for clarity
+#
+# 4. Private dotfiles:
+#    - Create files in dotfiles-private/ first
+#    - Add mapping here
+#    - Run ./install.sh to create symlink
+#    - Files in dotfiles-private/ are git-ignored (safe for credentials)
+#
+# 5. Removing a mapping:
+#    - Comment out with # or delete the entry
+#    - Run ./install.sh to update
+#    - Old symlink will remain (remove manually if needed)

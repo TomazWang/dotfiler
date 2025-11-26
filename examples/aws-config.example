@@ -1,0 +1,14 @@
+# AWS Config Example
+# Copy this to dotfiles-private/aws/config and customize
+
+[default]
+region = us-east-1
+output = json
+
+[profile work]
+region = us-west-2
+output = json
+
+[profile personal]
+region = ap-northeast-1
+output = yaml

@@ -6,6 +6,7 @@ set -e
 
 # Define the dotfiles directory
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PRIVATE_DIR="$DOTFILES_DIR/dotfiles-private"
 
 # Ensure Homebrew is in PATH
 export PATH="/opt/homebrew/bin:$PATH"
@@ -60,34 +61,82 @@ info "Step 2 complete. Duration: $((STEP_END - STEP_START)) seconds."
 
 echo
 STEP_START=$(date +%s)
-info "Step 3: Creating symbolic links..."
-# 3. Create symbolic links
+info "Step 3: Creating symbolic links from mappings.yaml..."
 
-# Link .zshrc
-info "Linking $DOTFILES_DIR/dotfiles/zshrc to $HOME/.zshrc"
-ln -sfv "$DOTFILES_DIR/dotfiles/zshrc" "$HOME/.zshrc"
+# Check if yq is available
+if ! command_exists yq; then
+    error "yq is not installed. Please run 'brew install yq' first."
+    exit 1
+fi
 
-# Link git configuration
-info "Linking $DOTFILES_DIR/dotfiles/gitconfig to $HOME/.gitconfig"
-ln -sfv "$DOTFILES_DIR/dotfiles/gitconfig" "$HOME/.gitconfig"
+# Check if mappings.yaml exists
+MAPPINGS_FILE="$DOTFILES_DIR/mappings.yaml"
+if [ ! -f "$MAPPINGS_FILE" ]; then
+    error "mappings.yaml not found at $MAPPINGS_FILE"
+    error "Please run ./init.sh first to generate platform-specific mappings."
+    exit 1
+fi
 
-# Link Node version (fnm/nvm)
-info "Linking $DOTFILES_DIR/dotfiles/nvmrc to $HOME/.nvmrc"
-ln -sfv "$DOTFILES_DIR/dotfiles/nvmrc" "$HOME/.nvmrc"
+# Function to create symlink with directory creation
+create_symlink() {
+    local source="$1"
+    local target="$2"
+    local type="$3"
 
-# Link Python version (pyenv)
-info "Linking $DOTFILES_DIR/dotfiles/python-version to $HOME/.pyenv/version"
-mkdir -p "$HOME/.pyenv"
-ln -sfv "$DOTFILES_DIR/dotfiles/python-version" "$HOME/.pyenv/version"
+    # Expand ~ in target path
+    target="${target/#\~/$HOME}"
 
-# Create ~/.config directory if it doesn't exist
-mkdir -p "$HOME/.config"
+    # Create parent directory if needed
+    local target_dir
+    target_dir="$(dirname "$target")"
+    if [ ! -d "$target_dir" ]; then
+        mkdir -p "$target_dir"
+    fi
 
-# Link ghostty config
-info "Linking $DOTFILES_DIR/dotfiles/ghostty to $HOME/.config/ghostty"
-ln -sfv "$DOTFILES_DIR/dotfiles/ghostty" "$HOME/.config/ghostty"
+    # Create symlink
+    if [ -e "$source" ] || [ -L "$source" ]; then
+        info "[$type] Linking $source -> $target"
+        ln -sfv "$source" "$target"
+    else
+        info "[$type] Source not found (skipping): $source"
+    fi
+}
 
-# Additional dotfiles can be added here as needed
+# Process public dotfiles mappings
+info "Processing public dotfiles..."
+PUBLIC_COUNT=$(yq eval '.public | length' "$MAPPINGS_FILE")
+if [ "$PUBLIC_COUNT" != "null" ] && [ "$PUBLIC_COUNT" -gt 0 ]; then
+    for i in $(seq 0 $((PUBLIC_COUNT - 1))); do
+        source=$(yq eval ".public[$i].source" "$MAPPINGS_FILE")
+        target=$(yq eval ".public[$i].target" "$MAPPINGS_FILE")
+
+        source_path="$DOTFILES_DIR/dotfiles/$source"
+        create_symlink "$source_path" "$target" "public"
+    done
+else
+    info "No public mappings found in mappings.yaml"
+fi
+
+# Process private dotfiles mappings
+info "Processing private dotfiles..."
+PRIVATE_COUNT=$(yq eval '.private | length' "$MAPPINGS_FILE")
+if [ "$PRIVATE_COUNT" != "null" ] && [ "$PRIVATE_COUNT" -gt 0 ]; then
+    if [ -d "$PRIVATE_DIR" ]; then
+        info "Private dotfiles directory found at $PRIVATE_DIR"
+        for i in $(seq 0 $((PRIVATE_COUNT - 1))); do
+            source=$(yq eval ".private[$i].source" "$MAPPINGS_FILE")
+            target=$(yq eval ".private[$i].target" "$MAPPINGS_FILE")
+
+            source_path="$PRIVATE_DIR/$source"
+            create_symlink "$source_path" "$target" "private"
+        done
+    else
+        info "No private dotfiles directory found (optional)."
+        info "To use private dotfiles, create: $PRIVATE_DIR"
+    fi
+else
+    info "No private mappings found in mappings.yaml"
+fi
 
 STEP_END=$(date +%s)
 info "Step 3 complete. Duration: $((STEP_END - STEP_START)) seconds."
@@ -95,3 +144,9 @@ info "Step 3 complete. Duration: $((STEP_END - STEP_START)) seconds."
 echo
 info "Dotfiles setup complete!"
 info "Please restart your shell for the changes to take effect."
+info ""
+info "📝 Configuration:"
+info "   - Edit mappings.yaml to customize which files are linked"
+info "   - For sensitive configs (credentials, API keys), use dotfiles-private/"
+info "   - Run ./init.sh to regenerate mappings.yaml if needed"
+info "   - See PRIVATE-DOTFILES-QUICKSTART.md for quick setup guide"

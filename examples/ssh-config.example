@@ -1,0 +1,28 @@
+# SSH Config Example
+# Copy this to dotfiles-private/ssh/config and customize
+
+# Default settings
+Host *
+    AddKeysToAgent yes
+    UseKeychain yes
+    IdentityFile ~/.ssh/id_ed25519
+
+# Example: GitHub
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/github_ed25519
+
+# Example: Personal server
+Host myserver
+    HostName example.com
+    User your-username
+    Port 22
+    IdentityFile ~/.ssh/myserver_key
+
+# Example: Work server with jump host
+Host work-internal
+    HostName internal.company.com
+    User your-work-username
+    ProxyJump jumphost.company.com
+    IdentityFile ~/.ssh/work_key

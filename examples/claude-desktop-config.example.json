@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "gsuite-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-google-drive"
+      ],
+      "env": {
+        "GOOGLE_CLIENT_ID": "your-client-id-here.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_SECRET": "your-client-secret-here"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/path/to/allowed/directory"
+      ]
+    }
+  },
+  "globalShortcut": "CommandOrControl+Shift+Space"
+}
