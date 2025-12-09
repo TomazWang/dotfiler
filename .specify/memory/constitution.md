@@ -1,50 +1,136 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+  SYNC IMPACT REPORT
+  ==================
+  Version Change: 1.0.0 → 2.0.0 (MAJOR: Complete restructure from placeholder template)
+
+  Modified Principles:
+  - [NEW] I. Zero Magic
+  - [NEW] II. Portable First
+  - [NEW] III. Organized by Purpose
+  - [NEW] IV. Preserve Functionality
+  - [NEW] V. Evidence-Based Development
+
+  Added Sections:
+  - Core Principles (5 principles from .ai/instructions.md)
+  - Development Standards (shell conventions, safety, feedback)
+  - AI Agent Protocol
+  - Speckit-Specific Configuration
+
+  Removed Sections:
+  - All placeholder template sections
+
+  Templates Status:
+  - .specify/templates/plan-template.md ✅ Compatible (Constitution Check section aligns)
+  - .specify/templates/spec-template.md ✅ Compatible (no constitution-specific references)
+  - .specify/templates/tasks-template.md ✅ Compatible (no constitution-specific references)
+
+  Follow-up TODOs: None
+-->
+
+# Dotfiler Constitution
+
+> **Source of Truth**: [`.ai/instructions.md`](../../.ai/instructions.md)
+>
+> This constitution derives principles from the main AI instructions file. For complete project documentation including architecture, workflows, and common tasks, always refer to `.ai/instructions.md`.
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Zero Magic
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Every operation MUST be explicit, understandable, and debuggable.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+- No hidden behavior or implicit configuration
+- All operations produce visible, traceable output
+- When something happens, users can understand why
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Portable First
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+The system MUST work on any Unix system (macOS, Linux) with standard tools only.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- Scripts use auto-detection instead of hardcoded paths
+- No platform-specific assumptions without explicit checks
+- Fallbacks for missing optional tools
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Organized by Purpose
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Files MUST be organized by what they DO, not what they ARE.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- `shell/functions/` for shell functions
+- `shell/scripts/` for complex scripts
+- `shell/configs/` for configuration (exports, aliases)
+- `bin/` for executables
+
+### IV. Preserve Functionality
+
+During migration or changes, MUST maintain 100% of existing functionality.
+
+- Never remove code that "seems unused" without verification
+- Keep all Brewfile packages, vendor scripts, existing functions
+- Document any intentional removals with rationale
+
+### V. Evidence-Based Development
+
+All changes MUST be verified with actual evidence.
+
+- Check actual state before giving advice
+- Show evidence: "I checked X by running Y, found Z"
+- No assumptions about "typical" setups
+- Test changes and verify they work
+
+## Development Standards
+
+### Shell Function Standards
+
+1. **Verbosity logging**: Use `SHELL_VERBOSE` pattern for debuggability
+2. **Error handling**: Return non-zero exit codes, provide helpful messages
+3. **Safety checks**: Validate paths, confirm destructive operations
+4. **User feedback**: Use emoji-based status indicators (🔄, ✓, ❌, ⚠️)
+
+### Safety Rules
+
+- ❌ Don't hardcode paths - Use `$DOTFILES_DIR`, `$DOTFILER_ROOT`, `$HOME`
+- ❌ Don't use git commands without explicit user request
+- ❌ Don't remove "unused" code during migration
+- ✅ Follow existing patterns - Check similar functions for conventions
+- ✅ Add safety checks - Validate paths, confirm destructive operations
+- ✅ Provide clear feedback - Emoji status, helpful error messages
+
+## AI Agent Protocol
+
+All AI agents working on this project MUST:
+
+1. **Read `.ai/instructions.md`** before making changes
+2. **Verify before advising** - Run diagnostic commands first
+3. **Never use git commands** unless explicitly requested by user
+4. **Preserve working state** - Don't leave system in broken state
+
+## Speckit-Specific Configuration
+
+### Constitution Check Gates
+
+When running `/speckit.plan`, verify:
+
+- [ ] Changes follow Zero Magic principle (explicit, traceable)
+- [ ] No hardcoded paths introduced
+- [ ] Existing functionality preserved
+- [ ] Changes tested with evidence
+
+### Task Categories
+
+Align with dotfiler structure:
+
+- **Shell functions**: `shell/functions/*.sh`
+- **Scripts**: `shell/scripts/*.sh`
+- **Configurations**: `shell/configs/*.sh`
+- **Executables**: `bin/*`
+- **Dotfiles**: `dotfiles/*`
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution:
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- References `.ai/instructions.md` as the authoritative source
+- Supersedes any conflicting local guidance
+- Amendments require updating both this file and `.ai/instructions.md` if principles change
+
+**Version**: 2.0.0 | **Ratified**: 2025-12-09 | **Last Amended**: 2025-12-09
