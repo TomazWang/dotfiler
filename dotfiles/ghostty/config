@@ -9,7 +9,7 @@ window-padding-y = 10
 
 # Font configuration (matching iTerm2)
 font-family = "RobotoMono Nerd Font"
-font-size = 16
+font-size = 12
 font-thicken = true
 
 # Window behavior

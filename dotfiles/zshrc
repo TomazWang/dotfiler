@@ -117,3 +117,6 @@ log_zshrc "Sourcing .local/bin/env if exists..."
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env" 2>/dev/null || echo "Warning: Failed to load .local/bin/env"
 log_zshrc "Finished sourcing .local/bin/env."
 
+
+# Added by Antigravity
+export PATH="/Users/tomazwang/.antigravity/antigravity/bin:$PATH"

@@ -31,3 +31,6 @@ mappings.yaml.backup
 # Backup files created by bring.sh
 *.backup
 **/*.backup
+
+# Spec tracking (legacy)
+.specstory/
