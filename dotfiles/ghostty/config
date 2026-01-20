@@ -46,3 +46,7 @@ copy-on-select = false
 
 # Advanced
 gtk-single-instance = false
+
+# macOS Option key - treat as Alt/Meta for keyboard shortcuts
+# Options: true (both), left, right, false
+macos-option-as-alt = true
