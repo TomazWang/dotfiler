@@ -26,6 +26,28 @@ alias codei.='codei .'
 
 # AIs
 alias cld='claude'
+alias claude-danger='claude --dangerously-skip-permissions'
+alias claude-headless='claude -p --allow-dangerously-skip-permissions --output-format "stream-json" --permission-mode bypassPermissions --verbose'
+
+# Claude Code profiles — session switcher (npmrc style)
+# Usage: claude-profile work   → sets CLAUDE_CONFIG_DIR for the whole shell session
+#        claude-profile         → resets to default (~/.claude)
+claude-profile() {
+  if [[ -z "$1" ]]; then
+    unset CLAUDE_CONFIG_DIR
+    echo "Claude profile: default (~/.claude)"
+  else
+    export CLAUDE_CONFIG_DIR=~/.claude-$1
+    echo "Claude profile: $1 ($CLAUDE_CONFIG_DIR)"
+  fi
+}
+
+# Claude Code profiles — explicit per-invocation aliases
+alias claude-work="CLAUDE_CONFIG_DIR=~/.claude-work command claude"
+alias claude-personal="CLAUDE_CONFIG_DIR=~/.claude-personal command claude"
+alias claude-work-danger="CLAUDE_CONFIG_DIR=~/.claude-work command claude --dangerously-skip-permissions"
+alias claude-personal-danger="CLAUDE_CONFIG_DIR=~/.claude-personal command claude --dangerously-skip-permissions"
+
 alias gmi='gemini'
 alias gemi='gemini'
 alias gmp='gemini -p'
@@ -52,9 +74,11 @@ alias src='source'
 
 # command alias
 alias cls='clear'
-alias newest='ll -s created | tr " " "\n"| tail -1' 
+alias notes='notesmd-cli'
+alias newest='ll -s created | tr " " "\n"| tail -1'
 alias o='open'
 alias oo='open .'
+alias obs='/Applications/Obsidian.app/Contents/MacOS/Obsidian'
 alias v='vim'
 alias x+='chmod +x'
 alias py='python3'
