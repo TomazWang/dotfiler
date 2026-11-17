@@ -1,0 +1,318 @@
+#!/bin/bash
+# cp-router — start the real `claude` on the right claude-profile.
+#
+# In your shell, `claude` runs this (shell/functions/claude-router.sh); `claude-primitive` skips it.
+# Orca runs it as the Claude agent Command (Settings → Agents → Claude).
+#
+#   claude --resume <id> | -r <id>   the profile whose REAL history file holds <id> (links ignored)
+#   claude --continue | -c           the profile with the newest real session for this folder
+#   claude --profile <p> …           use <p>; a session from another profile is COPIED into <p> first
+#   claude                           new session: typed in a terminal → numbered menu (Enter = current)
+#                                    launched by Orca / scripts / -p → current profile, no question
+#
+# "Current profile" = $CLAUDE_CONFIG_DIR if set, else the last `claude-profile` choice
+# (~/.claude_profile). Orca drops CLAUDE_CONFIG_DIR from its launches, so there it is the saved one.
+#
+# Profiles: claude-profiles.local at the repo root (gitignored; format in claude-profiles.local.example).
+# Overrides: CP_PROFILE=<p> (like --profile) · CP_ROUTER_ASK=0 (never ask) · CP_ROUTER_ASK=1 (ask
+# even when launched by a program, terminal only) · CP_ROUTER_CLAUDE=<path> (the real binary)
+# Log: ~/Library/Logs/cp-router.log
+
+REAL="${CP_ROUTER_CLAUDE:-$HOME/.local/bin/claude}"
+LOG="$HOME/Library/Logs/cp-router.log"
+ASK_TIMEOUT="${CP_ROUTER_TIMEOUT:-8}"
+LOCAL_PROFILES="${CP_ROUTER_PROFILES:-$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)/claude-profiles.local}"
+
+# Profile table: every profile comes from the gitignored claude-profiles.local (same file and
+# format as claude-profile: "<name> <dir> [aliases…]"). "default" = ~/.claude unless the file says
+# otherwise — it is where Claude goes with no CLAUDE_CONFIG_DIR, so it always exists.
+P_NAMES=() P_DIRS=() P_ALIASES=()
+if [ -r "$LOCAL_PROFILES" ]; then
+  while read -r _n _d _a; do
+    [ -n "$_n" ] || continue
+    P_NAMES+=("$_n"); P_DIRS+=("${_d/#\~/$HOME}"); P_ALIASES+=("$_a")
+  done < <(/usr/bin/sed -e 's/#.*//' "$LOCAL_PROFILES" | /usr/bin/awk 'NF')
+fi
+if [[ " ${P_NAMES[*]} " != *" default "* ]]; then
+  P_NAMES=(default "${P_NAMES[@]}"); P_DIRS=("$HOME/.claude" "${P_DIRS[@]}"); P_ALIASES=("0 me" "${P_ALIASES[@]}")
+fi
+PROFILES="${P_NAMES[*]}"
+
+dir_of() {
+  local i
+  for i in "${!P_NAMES[@]}"; do
+    if [[ " ${P_NAMES[$i]} ${P_ALIASES[$i]} " == *" $1 "* ]]; then echo "${P_DIRS[$i]}"; return 0; fi
+  done
+  return 1
+}
+
+name_of() {
+  local i d="${1%/}"
+  [ -z "$d" ] && { echo default; return; }
+  for i in "${!P_NAMES[@]}"; do
+    [ "${P_DIRS[$i]%/}" = "$d" ] && { echo "${P_NAMES[$i]}"; return; }
+  done
+  echo "${d##*/.claude-}"
+}
+
+log() {
+  mkdir -p "${LOG%/*}" 2>/dev/null
+  printf '%s [%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$$" "$*" >>"$LOG" 2>/dev/null
+}
+
+saved_profile() {
+  local line
+  line="$(/usr/bin/grep -m1 'CLAUDE_CONFIG_DIR' "$HOME/.claude_profile" 2>/dev/null)"
+  case "$line" in
+    export*=*) name_of "${line#*=}" ;;
+    *) echo default ;;
+  esac
+}
+
+current_profile() {
+  if [ -n "$CLAUDE_CONFIG_DIR" ]; then name_of "$CLAUDE_CONFIG_DIR"; else saved_profile; fi
+}
+
+# Real (non-link) history file of session <id> in profile <p>; empty if none.
+real_file_in() {
+  local f
+  for f in "$(dir_of "$2")"/projects/*/"$1".jsonl; do
+    [ -f "$f" ] && [ ! -L "$f" ] && { echo "$f"; return 0; }
+  done
+  return 1
+}
+
+# Profile holding the real file of <id>. If several do (a forced copy), the newest one wins.
+profile_with_session() {
+  local p f t best="" best_t=-1
+  for p in $PROFILES; do
+    f="$(real_file_in "$1" "$p")" || continue
+    t="$(/usr/bin/stat -f %m "$f" 2>/dev/null || echo 0)"
+    [ "$t" -gt "$best_t" ] && { best_t="$t"; best="$p"; }
+  done
+  [ -n "$best" ] && { echo "$best"; return 0; }
+  return 1
+}
+
+profile_with_newest_here() {
+  local enc p f best="" best_t=0 t
+  enc="$(pwd -P | /usr/bin/sed 's/[^A-Za-z0-9]/-/g')"
+  for p in $PROFILES; do
+    for f in "$(dir_of "$p")/projects/$enc"/*.jsonl; do
+      [ -f "$f" ] && [ ! -L "$f" ] || continue
+      t="$(/usr/bin/stat -f %m "$f" 2>/dev/null || echo 0)"
+      [ "$t" -gt "$best_t" ] && { best_t="$t"; best="$p"; }
+    done
+  done
+  [ -n "$best" ] && { echo "$best"; return 0; }
+  return 1
+}
+
+# Copy session <id> from profile <from> into profile <to> (same project folder), as a fork.
+copy_session() {
+  local id="$1" from="$2" to="$3" src proj dst
+  src="$(real_file_in "$id" "$from")" || return 1
+  proj="$(basename "$(dirname "$src")")"
+  dst="$(dir_of "$to")/projects/$proj"
+  mkdir -p "$dst" || return 1
+  [ -e "$dst/$id.jsonl" ] && [ ! -L "$dst/$id.jsonl" ] && return 0   # already copied
+  [ -L "$dst/$id.jsonl" ] && rm -f "$dst/$id.jsonl"                    # a handover link, replace
+  cp -p "$src" "$dst/$id.jsonl" || return 1
+  [ -d "$(dirname "$src")/$id" ] && [ ! -e "$dst/$id" ] && cp -Rp "$(dirname "$src")/$id" "$dst/$id"
+  return 0
+}
+
+# Arrow-key menu on /dev/tty. ↑/↓ (or k/j) move, a number picks at once, Enter starts, q quits.
+# Untouched, it starts the highlighted default after $ASK_TIMEOUT seconds; any key stops the timer.
+# Prints the chosen profile; empty = cancelled.
+ask_profile() {
+  local def="$1" names=() n=0 sel=0 i p key rest left="$ASK_TIMEOUT" timer=1 choice="" lines old
+  for p in $PROFILES; do names+=("$p"); [ "$p" = "$def" ] && sel=$n; n=$((n+1)); done
+  lines=$((n + 2))
+  old="$(stty -g </dev/tty 2>/dev/null)"
+  stty -echo -icanon -isig min 1 </dev/tty 2>/dev/null   # -isig: Ctrl-C arrives as a key (handled below)
+  printf '\033[?25l' >/dev/tty
+  trap 'printf "\r\033[%dA\033[J\033[2mclaude · cancelled\033[0m\n\033[?25h" "$((lines - 1))" >/dev/tty; stty "$old" </dev/tty 2>/dev/null; echo "claude: cancelled." >&2; exit 130' INT TERM
+
+  draw() {
+    local j mark tail
+    printf '\033[2K\033[1mclaude\033[0m · profile for a new session in %s\n' "$(pwd)" >/dev/tty
+    for ((j = 0; j < n; j++)); do
+      tail=""; [ "${names[$j]}" = "$def" ] && tail="  \033[2m(current)\033[0m"
+      if [ "$j" = "$sel" ]; then
+        printf '\033[2K  \033[36m❯ [%d] \033[1m%s\033[0m%b\n' "$((j + 1))" "${names[$j]}" "$tail" >/dev/tty
+      else
+        printf '\033[2K    [%d] %s%b\n' "$((j + 1))" "${names[$j]}" "$tail" >/dev/tty
+      fi
+    done
+    if [ "$timer" = 1 ]; then
+      printf '\033[2K\033[2m  ↑↓ move · 1-%d pick · Enter start · q quit · \033[0m\033[33mstarting %s in %ds\033[0m' \
+        "$n" "${names[$sel]}" "$left" >/dev/tty
+    else
+      printf '\033[2K\033[2m  ↑↓ move · 1-%d pick · Enter start · q quit\033[0m' "$n" >/dev/tty
+    fi
+  }
+  redraw() { printf '\r\033[%dA' "$((lines - 1))" >/dev/tty; draw; }
+
+  draw
+  while :; do
+    if ! IFS= read -rsn1 -t 1 key </dev/tty; then
+      [ "$timer" = 1 ] || continue
+      left=$((left - 1))
+      if [ "$left" -le 0 ]; then choice="${names[$sel]}"; break; fi
+      redraw; continue
+    fi
+    timer=0
+    case "$key" in
+      $'\033')
+        IFS= read -rsn2 -t 1 rest </dev/tty
+        case "$rest" in
+          '[A'|'OA') sel=$(( (sel + n - 1) % n )) ;;
+          '[B'|'OB') sel=$(( (sel + 1) % n )) ;;
+          *) choice=""; break ;;   # a bare Esc quits
+        esac ;;
+      k) sel=$(( (sel + n - 1) % n )) ;;
+      j) sel=$(( (sel + 1) % n )) ;;
+      [1-9]) if [ "$key" -le "$n" ]; then sel=$((key - 1)); choice="${names[$sel]}"; break; fi ;;
+      ''|$'\n'|$'\r') choice="${names[$sel]}"; break ;;
+      q|Q|$'\003'|$'\004') choice=""; break ;;   # q, Ctrl-C, Ctrl-D
+    esac
+    redraw
+  done
+
+  # Collapse the menu to one line saying what happened.
+  printf '\r\033[%dA\033[J' "$((lines - 1))" >/dev/tty
+  if [ -n "$choice" ]; then
+    printf '\033[2mclaude · profile:\033[0m \033[1m%s\033[0m\n' "$choice" >/dev/tty
+  else
+    printf '\033[2mclaude · cancelled\033[0m\n' >/dev/tty
+  fi
+  stty "$old" </dev/tty 2>/dev/null
+  printf '\033[?25h' >/dev/tty
+  trap - INT TERM
+  echo "$choice"
+}
+
+profiles_line() {
+  local i out=""
+  for i in "${!P_NAMES[@]}"; do out+="${out:+ · }${P_NAMES[$i]} ${P_DIRS[$i]/#$HOME/~}"; done
+  echo "$out"
+}
+
+router_help() {
+  cat <<EOF
+claude (cp-router) — starts the real Claude on the right claude-profile.
+Everything except the flags below goes to Claude unchanged; \`claude -h\` is Claude's own help.
+
+Profiles   $(profiles_line)
+           from ${LOCAL_PROFILES/#$HOME/~} (gitignored)
+Current    \$CLAUDE_CONFIG_DIR if set, else your last \`claude-profile\` choice — now: $(current_profile)
+
+Which profile starts
+  claude --resume <id> | -r <id>   the profile whose real history file holds <id> (links ignored)
+  claude --continue | -c           the profile with the newest real session in this folder
+  claude --profile <p> …           <p>; a session from another profile is copied into <p> as a fork
+  claude                           typed in a terminal: the menu below
+  Orca, scripts, -p, --session-id  the current profile, no menu
+
+Menu       ↑/↓ or k/j move · a number starts that one · Enter start · q, Esc or Ctrl-C quit
+           untouched, it starts the current profile after ${ASK_TIMEOUT}s; any key stops the timer
+
+Router flags (removed before Claude starts)
+  --profile <p>, --profile=<p>     force a profile
+  --router-help                    this help
+
+Environment
+  CP_PROFILE=<p>          like --profile
+  CP_ROUTER_ASK=0|1       0 never shows the menu · 1 shows it even for program launches
+  CP_ROUTER_TIMEOUT=<s>   menu auto-start seconds (default 8)
+  CP_ROUTER_CLAUDE=<path> the real binary (default ~/.local/bin/claude)
+
+claude-primitive …   runs the real Claude with no router
+Log                  ~/Library/Logs/cp-router.log
+EOF
+}
+
+# ---- read the arguments (and strip --profile, which claude does not know) ----
+resume_id="" cont=0 passthrough=0 headless=0 programmatic=0 forced="${CP_PROFILE:-}"
+args=()
+skip=0 prev=""
+for a in "$@"; do
+  if [ "$skip" = 1 ]; then forced="$a"; skip=0; prev="$a"; continue; fi
+  case "$a" in
+    --profile) skip=1; prev="$a"; continue ;;
+    --profile=*) forced="${a#--profile=}"; prev="$a"; continue ;;
+    --router-help) router_help; exit 0 ;;
+  esac
+  case "$prev" in --resume|-r) case "$a" in -*) ;; *) resume_id="$a" ;; esac ;; esac
+  case "$a" in
+    --session-id|--session-id=*|*orca-agent-view*) programmatic=1 ;;   # Orca/orchestration launches
+  esac
+  case "$a" in
+    --resume=*) resume_id="${a#--resume=}" ;;
+    -v|--version|-h|--help) passthrough=1 ;;
+    -c|--continue) cont=1 ;;
+    -p|--print) headless=1 ;;
+  esac
+  args+=("$a")
+  prev="$a"
+done
+case "${args[0]:-}" in
+  mcp|config|doctor|update|upgrade|install|migrate-installer|setup-token|plugin|plugins|auth|agents)
+    passthrough=1 ;;
+esac
+if [ -n "$forced" ] && ! dir_of "$forced" >/dev/null; then
+  echo "claude: unknown profile '$forced' (${PROFILES// /, })" >&2; exit 2
+fi
+[ -n "$forced" ] && forced="$(name_of "$(dir_of "$forced")")"
+
+# Typed by a person in a terminal? (the shell function sets CP_ROUTER_FROM_SHELL)
+interactive=0
+[ -t 0 ] && [ -t 2 ] && [ -r /dev/tty ] && interactive=1
+can_ask=0
+if [ "$interactive" = 1 ] && [ "$CP_ROUTER_ASK" != 0 ] && [ "$programmatic" = 0 ]; then
+  { [ -n "$CP_ROUTER_FROM_SHELL" ] || [ "$CP_ROUTER_ASK" = 1 ]; } && can_ask=1
+fi
+
+# ---- decide -------------------------------------------------------------------
+profile="" why=""
+if [ -n "$forced" ]; then
+  profile="$forced"; why="forced"
+  if [ -n "$resume_id" ] && ! real_file_in "$resume_id" "$forced" >/dev/null; then
+    if from="$(profile_with_session "$resume_id")"; then
+      if copy_session "$resume_id" "$from" "$forced"; then
+        why="forced: copied session from $from"
+        echo "claude: copied session $resume_id from $from into $forced (the $from original is unchanged)" >&2
+      else
+        echo "claude: could not copy session $resume_id from $from into $forced" >&2; exit 1
+      fi
+    fi
+  fi
+elif [ "$passthrough" = 1 ]; then
+  profile="$(current_profile)"; why="passthrough"
+elif [ -n "$resume_id" ] && profile="$(profile_with_session "$resume_id")"; then
+  why="resume: session found"
+elif [ "$cont" = 1 ] && profile="$(profile_with_newest_here)"; then
+  why="continue: newest here"
+elif [ "$headless" = 1 ] || [ "$can_ask" = 0 ]; then
+  profile="$(current_profile)"; why="current profile"
+else
+  why="asked"
+  [ -n "$resume_id" ] && why="resume: session not found, asked"
+  profile="$(ask_profile "$(current_profile)")"
+  if [ -z "$profile" ]; then
+    log "cancelled | cwd=$(pwd) | args: $(printf '%s ' "${args[@]}" | cut -c1-300)"
+    echo "claude: cancelled." >&2
+    exit 130
+  fi
+fi
+
+if [ "$profile" = default ]; then
+  unset CLAUDE_CONFIG_DIR
+else
+  export CLAUDE_CONFIG_DIR="$(dir_of "$profile")"
+fi
+log "$profile ($why) | cwd=$(pwd) | shell=${CP_ROUTER_FROM_SHELL:-0} structured=${ORCA_STRUCTURED_SESSION:-0} tty=$interactive | args: $(printf '%s ' "${args[@]}" | cut -c1-300)"
+unset CP_ROUTER_FROM_SHELL
+
+exec "$REAL" "${args[@]}"

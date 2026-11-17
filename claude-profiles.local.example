@@ -1,0 +1,10 @@
+# Claude profiles for claude-profile and bin/cp-router.
+# Copy to claude-profiles.local (gitignored) and edit. One profile per line:
+#
+#   <name>   <config dir>        [aliases ...]
+#
+# The menu lists them in this order. Without this file (or without a "default" line),
+# "default" = ~/.claude, which is where Claude goes when no profile is set.
+
+default  ~/.claude          0 me
+work     ~/.claude-work     1

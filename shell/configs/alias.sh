@@ -28,25 +28,121 @@ alias codei.='codei .'
 alias cld='claude'
 alias claude-danger='claude --dangerously-skip-permissions'
 alias claude-headless='claude -p --allow-dangerously-skip-permissions --output-format "stream-json" --permission-mode bypassPermissions --verbose'
+alias claude-auto='claude --enable-auto-mode'
+alias cla='claude agents'
+alias cla-danger='claude agents --dangerously-skip-permissions'
 
-# Claude Code profiles — session switcher (npmrc style)
-# Usage: claude-profile work   → sets CLAUDE_CONFIG_DIR for the whole shell session
-#        claude-profile         → resets to default (~/.claude)
+# Claude Code profiles — session switcher
+# Usage: claude-profile [ls|list] [<profile>] [-h|--help]
+# Profiles live in the gitignored $DOTFILER_ROOT/claude-profiles.local (format:
+# claude-profiles.local.example). bin/cp-router reads the same file. Without it, default = ~/.claude.
+_claude_profiles_local() {
+  local f
+  for f in "${DOTFILER_ROOT:+$DOTFILER_ROOT/claude-profiles.local}" "$HOME/dev/workspace/mine/dotfiler/claude-profiles.local"; do
+    [ -n "$f" ] && [ -r "$f" ] && { printf '%s\n' "$f"; return 0; }
+  done
+  return 1
+}
+
+# One line per profile: <name> <dir> [alias ...]
+_claude_profiles_table() {
+  local f rows=""
+  if f="$(_claude_profiles_local)"; then
+    rows="$(sed -e 's/#.*//' -e "s|~/|$HOME/|g" "$f" | awk 'NF { $1 = $1; print }')"
+  fi
+  # default always exists: it is where Claude goes with no CLAUDE_CONFIG_DIR.
+  printf '%s\n' "$rows" | grep -q '^default ' || echo "default $HOME/.claude 0 me"
+  [ -n "$rows" ] && printf '%s\n' "$rows"
+}
+
 claude-profile() {
+  local _table _name _dir _rest _w _d _current
+  _table="$(_claude_profiles_table)"
+
+  _claude_profile_current_name() {
+    local n d r
+    if [[ -z "$CLAUDE_CONFIG_DIR" ]]; then echo "default"; return; fi
+    while read -r n d r; do
+      [[ "${d%/}" == "${CLAUDE_CONFIG_DIR%/}" ]] && { echo "$n"; return; }
+    done <<< "$_table"
+    echo "${CLAUDE_CONFIG_DIR##*/.claude-}"
+  }
+
+  _claude_profile_help() {
+    local n d r
+    echo "Usage: claude-profile [ls|list] [<profile>] [-h|--help]"
+    echo ""
+    echo "Commands:"
+    echo "  (none)        show current active profile"
+    echo "  ls, list      list all profiles"
+    echo "  <profile>     switch to profile"
+    echo ""
+    echo "Profiles:"
+    while read -r n d r; do
+      printf '  %-8s %-22s %s\n' "$n" "${r:+(aliases: $r)}" "${d/#$HOME/~}"
+    done <<< "$_table"
+    echo ""
+    echo "More profiles: $DOTFILER_ROOT/claude-profiles.local (gitignored)"
+  }
+
+  _claude_profile_list() {
+    local n d r
+    _current="$(_claude_profile_current_name)"
+    echo "Profiles:"
+    while read -r n d r; do
+      if [[ "$n" == "$_current" ]]; then echo "  * $n  (active)"; else echo "    $n"; fi
+    done <<< "$_table"
+  }
+
+  _claude_profile_save() {
+    if [[ -z "$1" ]]; then
+      echo "unset CLAUDE_CONFIG_DIR" > ~/.claude_profile
+    else
+      echo "export CLAUDE_CONFIG_DIR=$1" > ~/.claude_profile
+    fi
+  }
+
   if [[ -z "$1" ]]; then
+    if [[ -z "$CLAUDE_CONFIG_DIR" ]]; then
+      echo "Claude profile: default (~/.claude)"
+    else
+      echo "Claude profile: $(_claude_profile_current_name) ($CLAUDE_CONFIG_DIR)"
+    fi
+    return 0
+  fi
+
+  case "$1" in
+    -h|--help) _claude_profile_help; return 0 ;;
+    ls|list) _claude_profile_list; return 0 ;;
+  esac
+
+  _name=""
+  while read -r _w _d _rest; do      # name, dir, aliases
+    if [[ " $_w $_rest " == *" $1 "* ]]; then _name="$_w"; _dir="$_d"; break; fi
+  done <<< "$_table"
+
+  if [[ -z "$_name" ]]; then
+    echo "claude-profile: unknown profile '$1'" >&2
+    echo "" >&2
+    _claude_profile_help >&2
+    return 1
+  fi
+  if [[ "$_name" == "default" ]]; then
     unset CLAUDE_CONFIG_DIR
+    _claude_profile_save ""
     echo "Claude profile: default (~/.claude)"
   else
-    export CLAUDE_CONFIG_DIR=~/.claude-$1
-    echo "Claude profile: $1 ($CLAUDE_CONFIG_DIR)"
+    export CLAUDE_CONFIG_DIR="$_dir"
+    _claude_profile_save "$CLAUDE_CONFIG_DIR"
+    echo "Claude profile: $_name ($CLAUDE_CONFIG_DIR)"
   fi
 }
 
 # Claude Code profiles — explicit per-invocation aliases
 alias claude-work="CLAUDE_CONFIG_DIR=~/.claude-work command claude"
-alias claude-personal="CLAUDE_CONFIG_DIR=~/.claude-personal command claude"
+alias claude-dev="CLAUDE_CONFIG_DIR=~/.claude-dev command claude"
 alias claude-work-danger="CLAUDE_CONFIG_DIR=~/.claude-work command claude --dangerously-skip-permissions"
-alias claude-personal-danger="CLAUDE_CONFIG_DIR=~/.claude-personal command claude --dangerously-skip-permissions"
+alias claude-dev-danger="CLAUDE_CONFIG_DIR=~/.claude-dev command claude --dangerously-skip-permissions"
 
 alias gmi='gemini'
 alias gemi='gemini'

@@ -34,3 +34,5 @@ mappings.yaml.backup
 
 # Spec tracking (legacy)
 .specstory/
+# Local, private Claude profiles (see claude-profiles.local.example)
+claude-profiles.local
