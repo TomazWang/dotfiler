@@ -5,7 +5,9 @@
       "Bash(echo $PATH)",
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
-      "Bash(gh pr comment:*)"
+      "Bash(gh pr comment:*)",
+      "Bash([ -d ~/.tmux/plugins/tpm ])",
+      "Bash(git clone:*)"
     ],
     "deny": [],
     "ask": []

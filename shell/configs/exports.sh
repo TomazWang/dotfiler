@@ -39,5 +39,11 @@ export SDKMAN_DIR="$HOME/.sdkman"
 
 # Add the bin directory to the PATH
 # Get the dotfiler root directory (relative to this script's location)
-DOTFILER_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+DOTFILER_ROOT="${DOTFILER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"  # keep .zshrc value: BASH_SOURCE is empty in zsh
 export PATH="$DOTFILER_ROOT/bin:$PATH"
+
+# gcloud SDK — use pyenv Python 3.11 to avoid interpreter errors
+export CLOUDSDK_PYTHON="$HOME/.pyenv/versions/3.11.13/bin/python3"
+
+# Persist claude-profile selection across shells
+[[ -f ~/.claude_profile ]] && source ~/.claude_profile

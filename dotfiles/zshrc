@@ -1,3 +1,10 @@
+# OPENSPEC:START
+# OpenSpec shell completions configuration
+fpath=("/Users/tomazwang/.oh-my-zsh/custom/completions" $fpath)
+autoload -Uz compinit
+compinit
+# OPENSPEC:END
+
 # Set to 1 to enable verbose logging, 0 to disable
 ZSHRC_VERBOSE=0
 
@@ -44,7 +51,7 @@ log_zshrc "Finished sourcing oh-my-zsh."
 # ============ Shell dotfiles =================
 log_zshrc "Sourcing shell dotfiles (load.sh)..."
 # Auto-detect dotfiler directory by resolving the .zshrc symlink
-DOTFILER_ROOT="$(cd "$(dirname "$(readlink ~/.zshrc)")/.." && pwd)"
+DOTFILER_ROOT="$(dirname "$(dirname "$(readlink ~/.zshrc)")")"
 if [ -f "$DOTFILER_ROOT/shell/load.sh" ]; then
     source "$DOTFILER_ROOT/shell/load.sh"
     log_zshrc "Sourced shell dotfiles from $DOTFILER_ROOT"
@@ -120,3 +127,4 @@ log_zshrc "Finished sourcing .local/bin/env."
 
 # Added by Antigravity
 export PATH="/Users/tomazwang/.antigravity/antigravity/bin:$PATH"
+
