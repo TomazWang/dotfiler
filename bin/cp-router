@@ -244,6 +244,9 @@ Menu       ↑/↓ or k/j move · a number starts that one · Enter start · q, 
 
 Router flags (removed before Claude starts)
   --profile <p>, --profile=<p>     force a profile
+  --select-only                    only pick a profile (menu, or --profile <p>) and save it as the
+                                   claude-profile choice; Claude does not start. Cancel exits 130:
+                                     cp-router --select-only && orca agent launch --agent claude --surface chat
   --router-help                    this help
 
 Environment
@@ -258,7 +261,7 @@ EOF
 }
 
 # ---- read the arguments (and strip --profile, which claude does not know) ----
-resume_id="" cont=0 passthrough=0 headless=0 programmatic=0 forced="${CP_PROFILE:-}"
+resume_id="" cont=0 passthrough=0 headless=0 programmatic=0 select_only=0 forced="${CP_PROFILE:-}"
 args=()
 skip=0 prev=""
 for a in "$@"; do
@@ -267,6 +270,7 @@ for a in "$@"; do
     --profile) skip=1; prev="$a"; continue ;;
     --profile=*) forced="${a#--profile=}"; prev="$a"; continue ;;
     --router-help) router_help; exit 0 ;;
+    --select-only) select_only=1; prev="$a"; continue ;;
   esac
   case "$prev" in --resume|-r) case "$a" in -*) ;; *) resume_id="$a" ;; esac ;; esac
   case "$a" in
@@ -296,6 +300,26 @@ interactive=0
 can_ask=0
 if [ "$interactive" = 1 ] && [ "$CP_ROUTER_ASK" != 0 ] && [ "$programmatic" = 0 ]; then
   { [ -n "$CP_ROUTER_FROM_SHELL" ] || [ "$CP_ROUTER_ASK" = 1 ]; } && can_ask=1
+fi
+
+# ---- --select-only: pick and save the profile, do not start Claude ----------------
+if [ "$select_only" = 1 ]; then
+  if [ -n "$forced" ]; then
+    profile="$forced"
+  elif [ "$interactive" = 1 ]; then
+    profile="$(ask_profile "$(current_profile)")"
+  else
+    echo "claude: --select-only needs a terminal for the menu (or pass --profile <p>)" >&2; exit 1
+  fi
+  if [ -z "$profile" ]; then echo "claude: cancelled." >&2; exit 130; fi
+  if [ "$profile" = default ]; then
+    echo "unset CLAUDE_CONFIG_DIR" > "$HOME/.claude_profile"
+  else
+    echo "export CLAUDE_CONFIG_DIR=$(dir_of "$profile")" > "$HOME/.claude_profile"
+  fi
+  log "$profile (select-only: saved) | cwd=$(pwd)"
+  echo "claude profile saved: $profile"
+  exit 0
 fi
 
 # ---- decide -------------------------------------------------------------------
