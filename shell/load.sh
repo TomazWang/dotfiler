@@ -36,10 +36,16 @@ source_if_exists() {
 }
 
 # Source all .sh files in the specified directories
-for dir in "shell/configs" "shell/functions" "shell/scripts" "shell/utils"; do
-    while IFS= read -r -d '' file; do
-        source_if_exists "$file"
-    done < <(find "$DOTFILES_DIR/$dir" -name "*.sh" -print0)
-done
+  for dir in "shell/configs" "shell/functions" "shell/scripts" "shell/utils"; do
+      while IFS= read -r -d '' file; do
+          # Skip files in tmux-agents directory
+          if [[ "$file" == */tmux-agents/* ]]; then
+              log_shell "Skipping $file (tmux-agents)"
+              continue
+          fi
+
+          source_if_exists "$file"
+      done < <(find "$DOTFILES_DIR/$dir" -name "*.sh" -print0)
+  done
 
 unset -f source_if_exists
