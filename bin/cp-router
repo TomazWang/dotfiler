@@ -74,10 +74,28 @@ current_profile() {
 }
 
 # Real (non-link) history file of session <id> in profile <p>; empty if none.
+# Is <file> (in profile <p>) a mirror — a hard link cp-link-sessions made of another profile's
+# transcript? Then it belongs to that other profile, not to <p>.
+mirror_owner() {
+  local file="$1" p="$2" q other rel
+  [ "$p" = default ] || return 1          # mirrors are only ever made in the default profile
+  [ "$(/usr/bin/stat -f %l "$file" 2>/dev/null || echo 1)" -gt 1 ] || return 1
+  rel="${file#"$(dir_of "$p")"/}"
+  for q in $PROFILES; do
+    [ "$q" = "$p" ] && continue
+    other="$(dir_of "$q")/$rel"
+    [ -f "$other" ] && [ "$other" -ef "$file" ] && { echo "$q"; return 0; }
+  done
+  return 1
+}
+
+# The profile's own (non-link, non-mirror) history file of session <id> in profile <p>; empty if none.
 real_file_in() {
   local f
   for f in "$(dir_of "$2")"/projects/*/"$1".jsonl; do
-    [ -f "$f" ] && [ ! -L "$f" ] && { echo "$f"; return 0; }
+    [ -f "$f" ] && [ ! -L "$f" ] || continue
+    mirror_owner "$f" "$2" >/dev/null && continue
+    echo "$f"; return 0
   done
   return 1
 }
@@ -100,6 +118,7 @@ profile_with_newest_here() {
   for p in $PROFILES; do
     for f in "$(dir_of "$p")/projects/$enc"/*.jsonl; do
       [ -f "$f" ] && [ ! -L "$f" ] || continue
+      mirror_owner "$f" "$p" >/dev/null && continue
       t="$(/usr/bin/stat -f %m "$f" 2>/dev/null || echo 0)"
       [ "$t" -gt "$best_t" ] && { best_t="$t"; best="$p"; }
     done
@@ -109,14 +128,19 @@ profile_with_newest_here() {
 }
 
 # Copy session <id> from profile <from> into profile <to> (same project folder), as a fork.
+# A mirror or symlink already there is replaced by a real copy, so the two accounts never write
+# into one file.
 copy_session() {
   local id="$1" from="$2" to="$3" src proj dst
   src="$(real_file_in "$id" "$from")" || return 1
   proj="$(basename "$(dirname "$src")")"
   dst="$(dir_of "$to")/projects/$proj"
   mkdir -p "$dst" || return 1
-  [ -e "$dst/$id.jsonl" ] && [ ! -L "$dst/$id.jsonl" ] && return 0   # already copied
-  [ -L "$dst/$id.jsonl" ] && rm -f "$dst/$id.jsonl"                    # a handover link, replace
+  if [ -L "$dst/$id.jsonl" ] || [ "$dst/$id.jsonl" -ef "$src" ]; then
+    rm -f "$dst/$id.jsonl"
+  elif [ -e "$dst/$id.jsonl" ]; then
+    return 0                                                            # already its own copy
+  fi
   cp -p "$src" "$dst/$id.jsonl" || return 1
   [ -d "$(dirname "$src")/$id" ] && [ ! -e "$dst/$id" ] && cp -Rp "$(dirname "$src")/$id" "$dst/$id"
   return 0
