@@ -1,0 +1,62 @@
+#!/bin/bash
+# cp-link-sessions — make sessions from other Claude profiles visible in ~/.claude, as symlinks.
+#
+# Why: Orca's "continue with chat UI" looks for a session's history only in ~/.claude/projects.
+# A session from another profile (e.g. ~/.claude-work) is invisible there, so Orca opens an empty
+# chat. A symlink at the same path makes Orca find it; bin/cp-router ignores symlinks and resumes
+# the session on the profile that holds the real file. Nothing is moved, copied or edited.
+#
+#   cp-link-sessions --hook            Claude hook (Stop / SessionStart): link this session if it
+#                                      belongs to another profile. Reads the hook JSON on stdin.
+#   cp-link-sessions --from <dir> [--days N]
+#                                      link that profile's sessions changed in the last N days
+#                                      (default 30)
+#   cp-link-sessions --list            show the links that exist
+#   cp-link-sessions --remove          delete every link in ~/.claude/projects (real files untouched)
+#
+# CP_LINK_TARGET=<dir> changes the target profile (default ~/.claude). Log: ~/Library/Logs/cp-router.log
+
+TARGET="${CP_LINK_TARGET:-$HOME/.claude}"
+TARGET="${TARGET%/}"
+LOG="$HOME/Library/Logs/cp-router.log"
+
+log() { { mkdir -p "${LOG%/*}" && printf '%s [link] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >>"$LOG"; } 2>/dev/null; }
+
+# Link one real transcript <file> into $TARGET/projects/<same folder>/. Quiet, idempotent.
+link_one() {
+  local src="$1" proj dst
+  [ -f "$src" ] && [ ! -L "$src" ] || return 0
+  case "$src" in "$TARGET"/*) return 0 ;; esac          # already in the target profile
+  case "$src" in */projects/*/*.jsonl) ;; *) return 0 ;; esac
+  case "$src" in */subagents/*) return 0 ;; esac
+  proj="$(basename "$(dirname "$src")")"
+  dst="$TARGET/projects/$proj/$(basename "$src")"
+  [ -e "$dst" ] || [ -L "$dst" ] && return 0              # a real file or link is already there
+  mkdir -p "$TARGET/projects/$proj" && ln -s "$src" "$dst" && log "linked $proj/$(basename "$src") -> ${src%%/projects/*}"
+}
+
+case "${1:-}" in
+  --hook)
+    # Hook JSON has "transcript_path". Never fail or slow the session.
+    tp="$(/usr/bin/python3 -c 'import json,sys; print(json.load(sys.stdin).get("transcript_path",""))' 2>/dev/null)"
+    [ -n "$tp" ] && link_one "$tp"
+    exit 0 ;;
+  --from)
+    from="${2%/}"; days=30
+    [ "${3:-}" = "--days" ] && days="${4:-30}"
+    [ -d "$from/projects" ] || { echo "cp-link-sessions: no projects folder in $from" >&2; exit 1; }
+    before=$(find "$TARGET/projects" -type l 2>/dev/null | wc -l)
+    find "$from/projects" -mindepth 2 -maxdepth 2 -name '*.jsonl' -type f -mtime "-$days" -print0 |
+      while IFS= read -r -d '' f; do link_one "$f"; done
+    after=$(find "$TARGET/projects" -type l 2>/dev/null | wc -l)
+    echo "cp-link-sessions: $((after - before)) new links from $from (last $days days); $after links in total"
+    ;;
+  --list)
+    find "$TARGET/projects" -type l -print 2>/dev/null | while IFS= read -r l; do echo "$l -> $(readlink "$l")"; done ;;
+  --remove)
+    n=$(find "$TARGET/projects" -type l 2>/dev/null | wc -l)
+    find "$TARGET/projects" -type l -delete 2>/dev/null
+    log "removed $n links"; echo "cp-link-sessions: removed $n links (real files untouched)" ;;
+  *)
+    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac
